@@ -1,0 +1,5 @@
+import numpy as np
+
+DETECTOR_OPENING_ANGLE = np.sqrt(1.022e-3)
+DETECTOR_LENGTH = 1.85 * 5.08e15 # GeV^-1
+SIN_WEINB = 0.22290
