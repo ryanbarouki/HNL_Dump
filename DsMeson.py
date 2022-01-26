@@ -15,6 +15,7 @@ class DsMeson(Particle):
 
     def decay(self, hnl_mass, num_samples, mixing_type: MixingType):
         # D -> N + lepton (electron, muon, tau)
+        # TODO checks on masses for allowed kinematics
         hnl = HNL(hnl_mass, beam=self.beam, parent=self)
         lepton = None
         if mixing_type == MixingType.electron:
