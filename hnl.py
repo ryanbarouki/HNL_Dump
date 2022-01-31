@@ -61,20 +61,12 @@ class HNL(Particle):
 
     def __total_decay_rate_to_lepton_pair(self, mixing_type):
         # TODO this is only valid for electron mixing channel at the moment
-        # TODO define weinberg angle in one place!!
-        Gf = 1.166e-5 # GeV-2
-        mN = self.m
-        # xl = self.m / mN
-        # log = np.log((1-3*xl**2 - (1-xl**2)*np.sqrt(1-4*xl**2))/((1 + np.sqrt(1-4*xl**2))*xl**2))
         c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         # c2 = 0.5*SIN_WEINB**2*(2*SIN_WEINB**2 - 1)
         c3 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         # c4 = 0.5*SIN_WEINB**2*(2*SIN_WEINB**2 + 1)
-        # gamma = (Gf**2*mN**5/(192*np.pi**3))*((c1*(1-delta) + c3*delta)*((1-14*xl**2 - 2*xl**4 - 12*xl**6)*np.sqrt(1-4*xl**2) / 
-        #         + 12*xl**4*(xl**4 - 1)*log) + 4*(c2*(1-delta)+c4*delta)*(xl**2*(2 + 10*xl**2 - 12*xl**4)*np.sqrt(1-4*xl**2) /
-        #         + 6*xl**4*(1 - 2*xl**2 + 2*xl**4)*log))
         if mixing_type == MixingType.electron:
-            return (Gf**2*mN**5/(192*np.pi**3))*(1+c3+c1)
+            return (GF**2*self.m**5/(192*np.pi**3))*(1+c3+c1)
         else:
             return Exception("Muon and Tau not implemented")
 

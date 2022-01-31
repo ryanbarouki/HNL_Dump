@@ -26,16 +26,8 @@ class DsMeson(Particle):
             lepton = Tau(parent=self, beam=self.beam)
 
         # set the kinematics of the children
-        e0_hnl = (self.m**2 + hnl.m**2 - lepton.m**2) / (2*self.m)
-        e_hnl = np.full(1000, e0_hnl)
-        e0_lepton = (self.m**2 + lepton.m**2 - hnl.m**2) / (2*self.m)
-        e_lepton = np.full(1000, e0_lepton)
-        cos = np.linspace(0., 1., 1000)
-        unit_func = lambda e, cos: e/e
-        hnl_rest_samples = generate_samples(e_hnl, cos, dist_func=unit_func, n_samples=num_samples)
-        hnl_rest_momenta = e_cos_theta_to_momentum4(hnl_rest_samples, hnl.m)
-        lepton_rest_samples = generate_samples(e_lepton, cos, dist_func=unit_func, n_samples=num_samples)
-        lepton_rest_momenta = e_cos_theta_to_momentum4(lepton_rest_samples, lepton.m)
+        hnl_rest_momenta = self.__get_two_body_momenta(hnl, lepton, num_samples)
+        lepton_rest_momenta = self.__get_two_body_momenta(lepton, hnl, num_samples)
 
         hnl.set_momenta(hnl_rest_momenta).boost(self.momenta) \
                                          .geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
@@ -48,3 +40,12 @@ class DsMeson(Particle):
         lepton.decay()
         
         return self
+    
+    def __get_two_body_momenta(self, particle, other_particle, num_samples):
+        e0 = (self.m**2 + particle.m**2 - other_particle.m**2) / (2*self.m)
+        e = np.full(1000, e0)
+        cos = np.linspace(0., 1., 1000)
+        unit_func = lambda e, cos: e/e
+        samples = generate_samples(e, cos, dist_func=unit_func, n_samples=num_samples)
+        sample_momenta = e_cos_theta_to_momentum4(samples, particle.m)
+        return sample_momenta
