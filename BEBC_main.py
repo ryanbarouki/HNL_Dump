@@ -43,7 +43,7 @@ def main():
     if len(sys.argv) > 3:
         plot = True
 
-    beam = BeamExperiment(beam_energy=400, nucleon_mass=1.0, \
+    beam = BeamExperiment(beam_energy=400, nucleon_mass=60.0, \
         max_opening_angle=DETECTOR_OPENING_ANGLE, detector_length=DETECTOR_LENGTH)
     
     start = time.time()
