@@ -1,7 +1,7 @@
 import numpy as np
-from pkg_resources import find_distributions
 from DsMeson import DsMeson
-from particle_masses import DS_MASS
+from DMeson import DMeson
+from particle_masses import *
 from utils import generate_samples, e_cos_theta_to_momentum4
 from mixing_type import MixingType
 
@@ -15,8 +15,11 @@ class BeamExperiment:
         self.DETECTOR_LENGTH = detector_length
     
     def start_dump(self, hnl_mass, num_samples, mixing_type: MixingType):
-        # pN -> Ds + X
-        self.__Ds_meson_channel(hnl_mass, num_samples, mixing_type)
+        if mixing_type == MixingType.electron:
+            self.__D_meson_channel(hnl_mass, num_samples, mixing_type)
+        else:
+            #TODO do this properly
+            self.__Ds_meson_channel(hnl_mass, num_samples, mixing_type)
         return self
 
 
@@ -35,10 +38,15 @@ class BeamExperiment:
         output=4.*(aux0*(aux2*((1.+(-2.*(np.abs(((s**-0.5)*aux3)))))**n)))
         return output
     
+    def __D_meson_channel(self, hnl_mass, num_samples, mixing_type):
+        momentum4_samples = self.__get_meson_kinematics(D_MASS, num_samples)
+        D_meson = DMeson(beam=self, momenta=momentum4_samples)
+        self.children.append(D_meson)
+        D_meson.decay(hnl_mass, num_samples, mixing_type)
+    
     def __Ds_meson_channel(self, hnl_mass, num_samples, mixing_type):
         momentum4_samples = self.__get_meson_kinematics(DS_MASS, num_samples)
         Ds_meson = DsMeson(beam=self, momenta=momentum4_samples)
-
         self.children.append(Ds_meson)
         Ds_meson.decay(hnl_mass, num_samples, mixing_type)  
     

@@ -59,16 +59,33 @@ class HNL(Particle):
         output = ((1+gl)**2 + gr**2)*(self.m*(ep + em) - 2*(ep**2 + em**2))
         return output
 
-    def __total_decay_rate_to_lepton_pair(self, mixing_type):
+    def d_gamma_dirac_dEp_dEm(self, ep, em, decay_type = DecayType.CCNC):
+        gr = SIN_WEINB**2 - 1/2
+        gl = SIN_WEINB**2
+        if decay_type == DecayType.CC:
+            gr = 0
+            gl = 0
+        elif decay_type == DecayType.NC:
+            gl = gl - 1
+        output = gr**2*em*(self.m - 2*em) + (1-gl)**2*ep*(self.m - 2*ep)
+        return output
+
+    def __partial_decay_rate_to_lepton_pair(self, mixing_type, decay_type=DecayType.CCNC):
         # TODO this is only valid for electron mixing channel at the moment
         c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         # c2 = 0.5*SIN_WEINB**2*(2*SIN_WEINB**2 - 1)
         c3 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         # c4 = 0.5*SIN_WEINB**2*(2*SIN_WEINB**2 + 1)
         if mixing_type == MixingType.electron:
-            return (GF**2*self.m**5/(192*np.pi**3))*(1+c3+c1)
+            # Ne -> e+ e- nu
+            if decay_type == DecayType.CC:
+                return (GF**2*self.m**5/(192*np.pi**3))
+            elif decay_type == DecayType.CCNC:
+                return (GF**2*self.m**5/(192*np.pi**3))*c3
+            else:
+                raise Exception("No value for only neutral current")
         else:
-            return Exception("Muon and Tau not implemented")
+            raise Exception("Muon and Tau not implemented")
 
     def __add_propagation_factors(self, length_detector, decay_rate):
         # TODO Currently only in linear regime
@@ -82,8 +99,9 @@ class HNL(Particle):
     def decay(self, num_samples, mixing_type: MixingType):
         e_l_plus = np.linspace(0, self.m/2, 1000)
         e_l_minus = np.linspace(0, self.m/2, 1000)
-        lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.d_gamma_majorana_dEp_dEm(ep, em, decay_type=DecayType.CCNC), n_samples=num_samples)
+        decay_type = DecayType.CC
+        lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.d_gamma_majorana_dEp_dEm(ep, em, decay_type=decay_type), n_samples=num_samples)
         di_lepton_momenta = self.__get_di_lepton_lab_frame(lepton_energy_samples)
-        self.__add_propagation_factors(self.beam.DETECTOR_LENGTH, self.__total_decay_rate_to_lepton_pair(mixing_type))
+        self.__add_propagation_factors(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
         self.signal = [Signal(di_lepton_momenta[i], self.propagation_factors[i]) for i in range(len(di_lepton_momenta))]
         return self

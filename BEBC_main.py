@@ -29,9 +29,10 @@ def get_total_normalised_hnl_decays(signal, num_samples, hnl_mass):
     opening_angle = 46 # micro sr
     pot = 1.9e18 # protons on target
     electron_nu_massless_flux = flux_density*pot*opening_angle
-    normalisation = electron_nu_massless_flux*(CS.P_TO_DPDM_X*BR.D_TO_E_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
+    # factor 2 since we have D+ and D-
+    normalisation_D_mesons = 2*electron_nu_massless_flux*(CS.P_TO_DPDM_X*BR.D_TO_E_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
     normalisation_to_muon = electron_nu_massless_flux*(CS.P_TO_DPDM_X*BR.D_TO_MU_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_MU_NUMU_X + CS.P_TO_D0D0_X*BR.D0_TO_MU_NUMU_X)
-    return fraction_decay*normalisation
+    return fraction_decay*normalisation_D_mesons
 
 def main():
     if len(sys.argv) < 3:
@@ -43,7 +44,7 @@ def main():
     if len(sys.argv) > 3:
         plot = True
 
-    beam = BeamExperiment(beam_energy=400, nucleon_mass=60.0, \
+    beam = BeamExperiment(beam_energy=400, nucleon_mass=58.0, \
         max_opening_angle=DETECTOR_OPENING_ANGLE, detector_length=DETECTOR_LENGTH)
     
     start = time.time()
