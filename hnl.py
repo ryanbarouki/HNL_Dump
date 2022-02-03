@@ -11,42 +11,34 @@ from mixing_type import MixingType
 from constants import *
 
 class HNL(Particle):
+    def __init__(self, mass, beam=None, parent=None, momenta=[]):
+        super().__init__(mass, beam, parent, momenta)
+        self.signal = {}
+
     def three_body_tau_decay(self, e, cos_theta):
         aux0=3.+(((-4.*e)/self.parent.m)+(((0.5*((self.m**2)*(-4.+((6.*e)/self.parent.m))))/self.parent.m)/e))
         output=8.*((e**2)*((np.sqrt((1.-((e**-2.)*(self.m**2)))))*(aux0*(self.parent.m**-3.))))
         return output
 
-    def __get_di_lepton_lab_frame(self, lepton_samples: np.ndarray):
-        """Returns the total energy and total transverse momentum of lepton pair"""
-        nu = Neutrino(self)
+    def __get_lepton_pair_lab_frame(self, lepton_samples: np.ndarray) -> Particle:
         # Sum of lepton pair momentum is anti-parallel to neutrino momentum
-        nu_momenta = []
+        di_lepton_rest_momenta = []
         for sample in lepton_samples:
             e_plus, e_minus = sample
+            e_tot = e_plus + e_minus
             # Valid sample region is a triangle
-            if e_plus + e_minus <= self.m/2:
+            if e_tot <= self.m/2:
                 continue
-            e_nu = self.m - (e_plus + e_minus) # Energy of the neutrino in rest frame
+            e_nu = self.m - e_tot # Energy of the neutrino in rest frame
             cos_th = np.random.uniform()
-            nu_momenta.append(Momentum4.from_polar(e_nu, cos_th, 0, nu.m))
-        nu.set_momenta(nu_momenta)
+            lepton_pair_inv_mass = np.sqrt(self.m**2 - 2*self.m*e_nu)
+            di_lepton_rest_momenta.append(Momentum4.from_polar(e_tot, cos_th, 0, lepton_pair_inv_mass))
         # Cut the samples short since the sample region constraint will remove some points
-        self.momenta = self.momenta[:len(nu_momenta)]
-        nu.set_momenta(nu_momenta).boost(self.momenta)
-        nu_lab_energies = nu.get_energies()
-        nu_lab_cos_theta = nu.get_cos_thetas()
-        # hnl_decay_factors = hnl_lab_samples_cut[:,2]
-        # p+ + p- has same momentum distribution as the neutrino in rest frame but energy is not the same
-        # So we must get the energy of the lepton pair in the lab frame
-        di_lepton_energies = self.get_energies() - nu_lab_energies
-        di_lepton_trans_momentum = nu_lab_energies*np.sqrt(1-nu_lab_cos_theta**2)
-        di_lepton_parallel_momentum = nu_lab_cos_theta*nu_lab_cos_theta
+        self.momenta = self.momenta[:len(di_lepton_rest_momenta)]
+        lepton_pair = Particle(m=0, beam=self.beam, parent=self)
+        lepton_pair.set_momenta(di_lepton_rest_momenta).boost(self.momenta)
 
-        di_lepton_momenta = []
-        for i in range(len(di_lepton_energies)):
-            di_lepton_momenta.append(Momentum4.from_e_pt_pp(di_lepton_energies[i], di_lepton_trans_momentum[i], di_lepton_parallel_momentum[i], 0, 0))
-
-        return np.array(di_lepton_momenta)
+        return lepton_pair
     
     def d_gamma_majorana_dEp_dEm(self, ep, em, decay_type = DecayType.CCNC):
         gr = SIN_WEINB**2 - 1/2
@@ -97,11 +89,13 @@ class HNL(Particle):
         return self
 
     def decay(self, num_samples, mixing_type: MixingType):
+        # Decay N -> e+ e- v
         e_l_plus = np.linspace(0, self.m/2, 1000)
         e_l_minus = np.linspace(0, self.m/2, 1000)
         decay_type = DecayType.CC
-        lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.d_gamma_majorana_dEp_dEm(ep, em, decay_type=decay_type), n_samples=num_samples)
-        di_lepton_momenta = self.__get_di_lepton_lab_frame(lepton_energy_samples)
+        lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.d_gamma_dirac_dEp_dEm(ep, em, decay_type=decay_type), n_samples=num_samples)
+        lepton_pair = self.__get_lepton_pair_lab_frame(lepton_energy_samples)
         self.__add_propagation_factors(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
-        self.signal = [Signal(di_lepton_momenta[i], self.propagation_factors[i]) for i in range(len(di_lepton_momenta))]
+        print(f"Partial width: {self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)}")
+        self.signal["e+e-v"] = [Signal(lepton_pair.momenta[i], self.propagation_factors[i]) for i in range(len(lepton_pair.momenta))]
         return self

@@ -32,6 +32,15 @@ class Particle:
             energies.append(p4.get_energy())
         return np.array(energies)
 
+    def get_transverse_masses(self):
+        if len(self.momenta) == 0:
+            raise Exception("Momenta array is empty!")
+        
+        transverse_masses = []
+        for p4 in self.momenta:
+            transverse_masses.append(p4.get_transverse_mass())
+        return np.array(transverse_masses)
+    
     def get_cos_thetas(self):
         if len(self.momenta) == 0:
             raise Exception("Momenta array is empty!")
