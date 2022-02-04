@@ -11,7 +11,7 @@ class SignalProcessor:
         hnls = self.beam.find_instances_of_type(HNL)
         if len(hnls) == 0:
             raise Exception("No HNLs!")
-        cut_signal = self.__apply_BEBC_cuts(hnls, "e+e-v")
+        cut_signal = self.__apply_BEBC_cuts(hnls, channel="e+e-v")
         normalised_hnl_decays = self.__get_normalised_hnl_flux_from_D_mesons(cut_signal, hnl_mass=hnls[0].m)
         upper_bound_squared = np.sqrt(2/normalised_hnl_decays)
 
@@ -52,4 +52,5 @@ class SignalProcessor:
         pot = 2.2e18 # protons on target
         electron_nu_massless_flux = flux_density*pot*opening_angle
         normalisation_D_mesons = electron_nu_massless_flux*(CS.P_TO_DPDM_X*BR.D_TO_E_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
+        # factor of 4 for the 4 decay channels (no need to treat them individually)
         return 4*fraction_decay*normalisation_D_mesons
