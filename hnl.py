@@ -1,5 +1,4 @@
 
-import imp
 import numpy as np
 from momentum4 import Momentum4
 from utils import generate_samples, e_cos_theta_to_momentum4

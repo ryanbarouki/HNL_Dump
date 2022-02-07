@@ -47,6 +47,7 @@ class SignalProcessor:
         fraction_decay = sum([signal.propagation_factor for signal in signal])/len(signal)
         print(f"Number in signal: {len(signal)}")
         print(f"fraction decay: {fraction_decay}")
+        # factor of 2 to include anti-neutrinos
         flux_density = 2*32e-9 # electron neutrinos per proton per micro sr
         opening_angle = 46 # micro sr
         pot = 2.2e18 # protons on target
