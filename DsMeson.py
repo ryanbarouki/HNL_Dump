@@ -33,11 +33,11 @@ class DsMeson(Particle):
                                          .geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
         lepton.set_momenta(lepton_rest_momenta).boost(self.momenta)
 
-        self.children.append(hnl)
-        self.children.append(lepton)
-
         hnl.decay(num_samples, mixing_type)
         lepton.decay()
+        
+        self.children.append(hnl)
+        self.children.append(lepton)
         
         return self
     

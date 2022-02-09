@@ -14,10 +14,6 @@ class HNL(Particle):
         super().__init__(mass, beam, parent, momenta)
         self.signal = {}
 
-    def three_body_tau_decay(self, e, cos_theta):
-        aux0=3.+(((-4.*e)/self.parent.m)+(((0.5*((self.m**2)*(-4.+((6.*e)/self.parent.m))))/self.parent.m)/e))
-        output=8.*((e**2)*((np.sqrt((1.-((e**-2.)*(self.m**2)))))*(aux0*(self.parent.m**-3.))))
-        return output
 
     def __get_lepton_pair_lab_frame(self, lepton_samples: np.ndarray) -> Particle:
         # Sum of lepton pair momentum is anti-parallel to neutrino momentum

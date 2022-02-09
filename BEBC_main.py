@@ -1,12 +1,8 @@
 import matplotlib.pyplot as plt
 from beam import BeamExperiment
 from mixing_type import MixingType
-import numpy as np
 import sys
 import time
-from hnl import HNL
-import cross_sections as CS
-import branching_ratios as BR
 from constants import *
 from signal_processor import SignalProcessor
 
