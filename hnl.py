@@ -4,7 +4,6 @@ from momentum4 import Momentum4
 from utils import generate_samples, e_cos_theta_to_momentum4
 from detector_signal import Signal
 from particle import Particle
-from neutrino import Neutrino
 from decay_type import DecayType
 from mixing_type import MixingType
 from constants import *
@@ -58,21 +57,19 @@ class HNL(Particle):
         return output
 
     def __partial_decay_rate_to_lepton_pair(self, mixing_type, decay_type=DecayType.CCNC):
-        # TODO this is only valid for electron mixing channel at the moment
         c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
-        # c2 = 0.5*SIN_WEINB**2*(2*SIN_WEINB**2 - 1)
-        c3 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
-        # c4 = 0.5*SIN_WEINB**2*(2*SIN_WEINB**2 + 1)
+        c2 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         if mixing_type == MixingType.electron:
-            # Ne -> e+ e- nu
+            # Ne -> e+ e- nu_e
             if decay_type == DecayType.CC:
                 return (GF**2*self.m**5/(192*np.pi**3))
             elif decay_type == DecayType.CCNC:
-                return (GF**2*self.m**5/(192*np.pi**3))*c3
+                return (GF**2*self.m**5/(192*np.pi**3))*c2
             else:
                 raise Exception("No value for only neutral current")
-        else:
-            raise Exception("Muon and Tau not implemented")
+        elif mixing_type == MixingType.tau:
+            # N_tau -> e+ e- nu_tau
+            return (GF**2*self.m**5/(192*np.pi**3))*c1
 
     def __add_propagation_factors(self, length_detector, decay_rate):
         # TODO Currently only in linear regime

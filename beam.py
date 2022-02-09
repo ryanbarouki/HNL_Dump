@@ -16,9 +16,9 @@ class BeamExperiment:
     
     def start_dump(self, hnl_mass, num_samples, mixing_type: MixingType):
         if mixing_type == MixingType.electron:
+            # I think Ds decays contribute here too? But I think Subir ignores this
             self.__D_meson_channel(hnl_mass, num_samples, mixing_type)
         elif mixing_type == MixingType.tau:
-            #TODO do this properly
             self.__Ds_meson_channel(hnl_mass, num_samples, mixing_type)
         return self
 

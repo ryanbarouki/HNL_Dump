@@ -2,8 +2,6 @@ import numpy as np
 from particle import Particle
 from hnl import HNL
 from electron import Electron
-from muon import Muon
-from tau import Tau
 from mixing_type import MixingType
 from particle_masses import *
 from utils import generate_samples, e_cos_theta_to_momentum4
@@ -14,31 +12,20 @@ class DMeson(Particle):
         super().__init__(D_MASS, beam, parent, momenta)
 
     def decay(self, hnl_mass, num_samples, mixing_type: MixingType):
-        # D -> N + lepton (electron, muon, tau)
-        # TODO checks on masses for allowed kinematics
+        # D -> N + electron (muon but not implemented)
         hnl = HNL(hnl_mass, beam=self.beam, parent=self)
-        lepton = None
-        if mixing_type == MixingType.electron:
-            lepton = Electron(parent=self, beam=self.beam)
-        elif mixing_type == MixingType.muon:
-            lepton = Muon(parent=self, beam=self.beam)
-        elif mixing_type == MixingType.tau:
-            lepton = Tau(parent=self, beam=self.beam)
+        electron = Electron(parent=self, beam=self.beam)
 
         # set the kinematics of the children
-        hnl_rest_momenta = self.__get_two_body_momenta(hnl, lepton, num_samples)
-        lepton_rest_momenta = self.__get_two_body_momenta(lepton, hnl, num_samples)
+        hnl_rest_momenta = self.__get_two_body_momenta(hnl, electron, num_samples)
 
         hnl.set_momenta(hnl_rest_momenta).boost(self.momenta) \
                                          .geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
-        lepton.set_momenta(lepton_rest_momenta).boost(self.momenta)
 
         hnl.decay(num_samples, mixing_type)
-        if isinstance(lepton, Tau):
-            lepton.decay(hnl_mass, num_samples, mixing_type)
 
         self.children.append(hnl)
-        self.children.append(lepton)
+        self.children.append(electron)
         
         return self
     

@@ -13,6 +13,7 @@ class Tau(Particle):
         e_max = (self.m**2 + hnl_mass**2)/(2*self.m)
         e = np.linspace(hnl_mass, e_max, 1000)
         cos_theta = np.linspace(0., 1., 1000)
+        # TODO two body tau decay tau -> N pi
         hnl_rest_samples = generate_samples(e, cos_theta, dist_func=lambda e, cos: self.diff_decay_to_hnl_nu_lepton(hnl_mass, e, cos), n_samples=num_samples)
         hnl_rest_momenta  = e_cos_theta_to_momentum4(hnl_rest_samples, hnl_mass)
 
