@@ -6,7 +6,7 @@ from utils import generate_samples, e_cos_theta_to_momentum4
 from mixing_type import MixingType
 
 class BeamExperiment:
-    def __init__(self, beam_energy, nucleon_mass, max_opening_angle, detector_length, detector_distance, linear_regime=True, mixing_squared=1):
+    def __init__(self, beam_energy, nucleon_mass, max_opening_angle, detector_length, detector_distance):
         self.s = nucleon_mass*(2*beam_energy + nucleon_mass)
         self.beta_cm = beam_energy/(beam_energy + nucleon_mass)
         self.gamma_cm = (beam_energy + nucleon_mass)/np.sqrt(self.s)
@@ -14,9 +14,13 @@ class BeamExperiment:
         self.MAX_OPENING_ANGLE = max_opening_angle
         self.DETECTOR_LENGTH = detector_length
         self.DETECTOR_DISTANCE = detector_distance
-        self.linear_regime = linear_regime
-        self.mixing_squared = 1 if linear_regime else mixing_squared
+        self.linear_regime = True
+        self.mixing_squared = 1
     
+    def with_mixing(self, mixing_squared):
+        self.linear_regime = False
+        self.mixing_squared = mixing_squared
+
     def start_dump(self, hnl_mass, num_samples, mixing_type: MixingType):
         if mixing_type == MixingType.electron:
             # I think Ds decays contribute here too? But I think Subir ignores this
