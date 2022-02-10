@@ -6,13 +6,16 @@ from utils import generate_samples, e_cos_theta_to_momentum4
 from mixing_type import MixingType
 
 class BeamExperiment:
-    def __init__(self, beam_energy, nucleon_mass, max_opening_angle, detector_length):
+    def __init__(self, beam_energy, nucleon_mass, max_opening_angle, detector_length, detector_distance, linear_regime=True, mixing_squared=1):
         self.s = nucleon_mass*(2*beam_energy + nucleon_mass)
         self.beta_cm = beam_energy/(beam_energy + nucleon_mass)
         self.gamma_cm = (beam_energy + nucleon_mass)/np.sqrt(self.s)
         self.children = []
         self.MAX_OPENING_ANGLE = max_opening_angle
         self.DETECTOR_LENGTH = detector_length
+        self.DETECTOR_DISTANCE = detector_distance
+        self.linear_regime = linear_regime
+        self.mixing_squared = 1 if linear_regime else mixing_squared
     
     def start_dump(self, hnl_mass, num_samples, mixing_type: MixingType):
         if mixing_type == MixingType.electron:
@@ -21,7 +24,6 @@ class BeamExperiment:
         elif mixing_type == MixingType.tau:
             self.__Ds_meson_channel(hnl_mass, num_samples, mixing_type)
         return self
-
 
     def __meson_diff_distribution(self, mass, eM, c_thetaM):
         # params

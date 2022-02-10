@@ -62,23 +62,37 @@ class HNL(Particle):
         if mixing_type == MixingType.electron:
             # Ne -> e+ e- nu_e
             if decay_type == DecayType.CC:
-                return (GF**2*self.m**5/(192*np.pi**3))
+                return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))
             elif decay_type == DecayType.CCNC:
-                return (GF**2*self.m**5/(192*np.pi**3))*c2
+                return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*c2
             else:
                 raise Exception("No value for only neutral current")
         elif mixing_type == MixingType.tau:
             # N_tau -> e+ e- nu_tau
-            return (GF**2*self.m**5/(192*np.pi**3))*c1
+            return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*c1
 
-    def __add_propagation_factors(self, length_detector, decay_rate):
-        # TODO Currently only in linear regime
+    def __add_linear_propagation_factors(self, length_detector, decay_rate):
         factors = []
         for p in self.momenta:
             factor = length_detector*self.m*decay_rate/p.get_total_momentum()
             factors.append(factor)
         self.propagation_factors = factors
         return self
+
+    def __add_non_linear_propagation_factors(self, detector_length, detector_distance, partial_decay_rate, total_decay_rate):
+        factors = []
+        for p in self.momenta:
+            ptot = p.get_total_momentum()
+            factor1 = np.exp(-detector_distance*self.m/(ptot*total_decay_rate))
+            factor2 = 1 - np.exp(-detector_length*self.m/(ptot*total_decay_rate))
+            factor = factor1*factor2*(total_decay_rate/partial_decay_rate)
+            factors.append(factor)
+        self.propagation_factors = factors
+        return self
+
+    def __total_decay_rate(self):
+        # TODO implement this
+        pass
 
     def decay(self, num_samples, mixing_type: MixingType):
         # Decay N -> e+ e- v
@@ -87,7 +101,14 @@ class HNL(Particle):
         decay_type = DecayType.CC
         lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.d_gamma_dirac_dEp_dEm(ep, em, decay_type=decay_type), n_samples=num_samples)
         lepton_pair = self.__get_lepton_pair_lab_frame(lepton_energy_samples)
-        self.__add_propagation_factors(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
-        print(f"Partial width: {self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)}")
+
+        if self.beam.linear_regime:
+            self.__add_linear_propagation_factors(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
+            print(f"Partial width: {self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)}")
+        else:
+            partial_decay = self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)
+            total_decay = self.__total_decay_rate()
+            self.__add_non_linear_propagation_factors(self.beam.DETECTOR_LENGTH, self.beam.DETECTOR_DISTANCE, partial_decay, total_decay)
+        
         self.signal["e+e-v"] = [Signal(lepton_pair.momenta[i], self.propagation_factors[i]) for i in range(len(lepton_pair.momenta))]
         return self

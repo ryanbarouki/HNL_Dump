@@ -18,6 +18,15 @@ class SignalProcessor:
         self.__debug_print_average_p(hnls)
         return upper_bound_squared, cut_signal
 
+    def is_mixing_too_small(self):
+        hnls = self.beam.find_instances_of_type(HNL)
+        if len(hnls) == 0:
+            raise Exception("No HNLs!")
+        cut_signal = self.__apply_BEBC_cuts(hnls, channel="e+e-v")
+        normalised_hnl_decays = self.__get_normalised_hnl_flux_from_D_mesons(cut_signal, hnl_mass=hnls[0].m)
+        observed_events = 2
+        return normalised_hnl_decays < observed_events
+
     def __debug_print_average_p(self, hnls):
         total_p = []
         for hnl in hnls:

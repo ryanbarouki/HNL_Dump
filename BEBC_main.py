@@ -12,7 +12,6 @@ def main():
                         Usage: python BEBC_main.py <HNL mass in GeV> <number samples> -e/-t (-p)")
     hnl_mass = float(sys.argv[1])
     num_samples = int(sys.argv[2]) 
-
     plot = False
     mixing_type = MixingType.tau
     for flag in sys.argv[3:]:
@@ -27,8 +26,10 @@ def main():
     start = time.time()
 
     beam = BeamExperiment(beam_energy=400, nucleon_mass=58.0, \
-        max_opening_angle=DETECTOR_OPENING_ANGLE, detector_length=DETECTOR_LENGTH)
-    beam.start_dump(hnl_mass, num_samples, mixing_type)
+        max_opening_angle=DETECTOR_OPENING_ANGLE, detector_length=DETECTOR_LENGTH, \
+        detector_distance=DETECTOR_DISTANCE)
+
+    beam.start_dump(hnl_mass, num_samples=num_samples, mixing_type=mixing_type)
     upper_bound_squared, cut_signal = SignalProcessor(beam).get_bound()
     print(f"U squared: {upper_bound_squared}")
 
