@@ -9,10 +9,19 @@ def e_cos_theta_to_momentum4(samples, mass):
         e, cos_theta = sample
         momentum4_samples.append(Momentum4.from_polar(e, cos_theta, 0, mass))
     return np.array(momentum4_samples)
-
+    
 def generate_samples(*x, dist_func, n_samples):
     samples = sample_nd_dist(*x, dist_func=dist_func, n_samples=n_samples)
     return samples
+
+def get_two_body_momenta(parent, particle, other_particle, num_samples):
+    e0 = (parent.m**2 + particle.m**2 - other_particle.m**2) / (2*parent.m)
+    e = np.full(1000, e0)
+    cos = np.linspace(0., 1., 1000)
+    unit_func = lambda e, cos: e/e
+    samples = generate_samples(e, cos, dist_func=unit_func, n_samples=num_samples)
+    sample_momenta = e_cos_theta_to_momentum4(samples, particle.m)
+    return sample_momenta
 
 def sample_2d_dist(dist_func, x, y, n):
     X, Y = np.meshgrid(x, y)

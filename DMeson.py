@@ -4,7 +4,7 @@ from hnl import HNL
 from electron import Electron
 from mixing_type import MixingType
 from particle_masses import *
-from utils import generate_samples, e_cos_theta_to_momentum4
+from utils import generate_samples, e_cos_theta_to_momentum4, get_two_body_momenta
 
 class DMeson(Particle):
     """D+/- meson"""
@@ -17,7 +17,7 @@ class DMeson(Particle):
         electron = Electron(parent=self, beam=self.beam)
 
         # set the kinematics of the children
-        hnl_rest_momenta = self.__get_two_body_momenta(hnl, electron, num_samples)
+        hnl_rest_momenta = get_two_body_momenta(self, hnl, electron, num_samples)
 
         hnl.set_momenta(hnl_rest_momenta).boost(self.momenta) \
                                          .geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
@@ -28,12 +28,3 @@ class DMeson(Particle):
         self.children.append(electron)
         
         return self
-    
-    def __get_two_body_momenta(self, particle, other_particle, num_samples):
-        e0 = (self.m**2 + particle.m**2 - other_particle.m**2) / (2*self.m)
-        e = np.full(1000, e0)
-        cos = np.linspace(0., 1., 1000)
-        unit_func = lambda e, cos: e/e
-        samples = generate_samples(e, cos, dist_func=unit_func, n_samples=num_samples)
-        sample_momenta = e_cos_theta_to_momentum4(samples, particle.m)
-        return sample_momenta

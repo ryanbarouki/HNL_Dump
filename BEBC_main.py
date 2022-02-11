@@ -1,3 +1,4 @@
+#!/usr/local/bin/python3
 import matplotlib.pyplot as plt
 from beam import BeamExperiment
 from mixing_type import MixingType
