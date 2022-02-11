@@ -1,5 +1,5 @@
 import numpy as np
-from hnl import HNL
+from particles.hnl import HNL
 import branching_ratios as BR
 import cross_sections as CS
 

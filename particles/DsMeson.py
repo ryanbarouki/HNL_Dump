@@ -1,11 +1,11 @@
 import numpy as np
-from neutrino import Neutrino
+from .neutrino import Neutrino
 from particle_masses import *
 from utils import generate_samples, e_cos_theta_to_momentum4, get_two_body_momenta
-from particle import Particle
-from electron import Electron
-from tau import Tau
-from hnl import HNL
+from .particle import Particle
+from .electron import Electron
+from .tau import Tau
+from .hnl import HNL
 from mixing_type import MixingType
 
 class DsMeson(Particle):

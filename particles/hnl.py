@@ -3,7 +3,7 @@ import numpy as np
 from momentum4 import Momentum4
 from utils import generate_samples, e_cos_theta_to_momentum4
 from detector_signal import Signal
-from particle import Particle
+from .particle import Particle
 from decay_type import DecayType
 from mixing_type import MixingType
 from constants import *

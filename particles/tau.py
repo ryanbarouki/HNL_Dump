@@ -1,6 +1,6 @@
 import numpy as np
-from hnl import HNL
-from particle import Particle
+from .hnl import HNL
+from .particle import Particle
 from particle_masses import *
 from utils import generate_samples, e_cos_theta_to_momentum4
 

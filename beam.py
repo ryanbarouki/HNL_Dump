@@ -1,6 +1,6 @@
 import numpy as np
-from DsMeson import DsMeson
-from DMeson import DMeson
+from particles.DsMeson import DsMeson
+from particles.DMeson import DMeson
 from particle_masses import *
 from utils import generate_samples, e_cos_theta_to_momentum4
 from mixing_type import MixingType

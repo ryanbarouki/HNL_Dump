@@ -1,4 +1,4 @@
-from particle import Particle
+from .particle import Particle
 from particle_masses import *
 
 class Electron(Particle):

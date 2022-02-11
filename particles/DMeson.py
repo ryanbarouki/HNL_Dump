@@ -1,7 +1,7 @@
 import numpy as np
-from particle import Particle
-from hnl import HNL
-from electron import Electron
+from .particle import Particle
+from .hnl import HNL
+from .electron import Electron
 from mixing_type import MixingType
 from particle_masses import *
 from utils import generate_samples, e_cos_theta_to_momentum4, get_two_body_momenta
