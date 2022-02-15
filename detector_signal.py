@@ -1,4 +1,3 @@
 class Signal:
-    def __init__(self, momentum, propagation_factor):
+    def __init__(self, momentum):
         self.momentum = momentum
-        self.propagation_factor = propagation_factor

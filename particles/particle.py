@@ -60,8 +60,9 @@ class Particle:
             if cos_theta > min_cos_theta and cos_theta < max_cos_theta:
                 cut_momenta.append(p)
         
+        acceptance =  len(cut_momenta)/len(self.momenta)
         self.momenta = cut_momenta
-        return self
+        return acceptance
     
     def decay(self):
         return self

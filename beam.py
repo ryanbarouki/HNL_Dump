@@ -43,6 +43,25 @@ class BeamExperiment:
         aux3=(c_thetaM*((np.sqrt(((eM**2)-(mass**2))))*gamma_cm))-(eM*(beta_cm*gamma_cm))
         output=4.*(aux0*(aux2*((1.+(-2.*(np.abs(((s**-0.5)*aux3)))))**n)))
         return output
+
+    def meson_simple_dist(self, mass, e, cos):
+        b = 0.93
+        n = 6.
+        xf = (2*self.gamma_cm/np.sqrt(self.s))*(np.sqrt(e**2 - mass**2)*cos - self.beta_cm*e)
+        pt2 = (e**2 - mass**2)*(1 - cos**2)
+        # jacobian involves change from xf and pT^2 to E and parallel momentum in the lab frame
+        jacobian = -(4*self.gamma_cm/np.sqrt(self.s))*(e*np.sqrt(e**2 - mass**2) - self.beta_cm*cos*e**2 + self.beta_cm*cos*mass**2)
+        return jacobian*np.exp(-b*pt2)*(1-np.abs(xf))**n
+
+    def test_meson_dist(self, pp, pt2):
+        b = 0.93
+        n = 6.
+        xf = 2*pp/np.sqrt(self.s)
+
+        # if pt2 + pp**2 < self.s/4 - mass**2:
+        return np.exp(-b*pt2)*(1 - np.abs(xf))**n
+        # else:
+        #     return 0
     
     def __D_meson_channel(self, hnl_mass, num_samples, mixing_type):
         momentum4_samples = self.__get_meson_kinematics(D_MASS, num_samples)

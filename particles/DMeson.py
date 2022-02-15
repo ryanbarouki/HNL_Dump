@@ -19,8 +19,7 @@ class DMeson(Particle):
         # set the kinematics of the children
         hnl_rest_momenta = get_two_body_momenta(self, hnl, electron, num_samples)
 
-        hnl.set_momenta(hnl_rest_momenta).boost(self.momenta) \
-                                         .geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
+        hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)
 
         hnl.decay(num_samples, mixing_type)
 

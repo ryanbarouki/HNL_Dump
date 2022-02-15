@@ -71,12 +71,12 @@ class HNL(Particle):
             # N_tau -> e+ e- nu_tau
             return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*c1
 
-    def __add_linear_propagation_factors(self, length_detector, decay_rate):
+    def __average_propagation_factor(self, length_detector, decay_rate):
         factors = []
         for p in self.momenta:
             factor = length_detector*self.m*decay_rate/p.get_total_momentum()
             factors.append(factor)
-        self.propagation_factors = factors
+        self.average_propagation_factor = np.average(factors)
         return self
 
     def __add_non_linear_propagation_factors(self, detector_length, detector_distance, partial_decay_rate, total_decay_rate):
@@ -99,16 +99,18 @@ class HNL(Particle):
         e_l_plus = np.linspace(0, self.m/2, 1000)
         e_l_minus = np.linspace(0, self.m/2, 1000)
         decay_type = DecayType.CC
-        lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.d_gamma_dirac_dEp_dEm(ep, em, decay_type=decay_type), n_samples=num_samples)
-        lepton_pair = self.__get_lepton_pair_lab_frame(lepton_energy_samples)
 
+        self.acceptance = self.geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
         if self.beam.linear_regime:
-            self.__add_linear_propagation_factors(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
+            self.__average_propagation_factor(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
             print(f"Partial width: {self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)}")
         else:
             partial_decay = self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)
             total_decay = self.__total_decay_rate()
             self.__add_non_linear_propagation_factors(self.beam.DETECTOR_LENGTH, self.beam.DETECTOR_DISTANCE, partial_decay, total_decay)
         
-        self.signal["e+e-v"] = [Signal(lepton_pair.momenta[i], self.propagation_factors[i]) for i in range(len(lepton_pair.momenta))]
+        lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.d_gamma_dirac_dEp_dEm(ep, em, decay_type=decay_type), n_samples=num_samples)
+        lepton_pair = self.__get_lepton_pair_lab_frame(lepton_energy_samples)
+
+        self.signal["e+e-v"] = [Signal(momentum) for momentum in lepton_pair.momenta]
         return self

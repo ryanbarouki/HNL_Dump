@@ -1,10 +1,11 @@
 import numpy as np
 from numpy.random.mtrand import sample
-from particles import Ds
+from particle_masses import D_MASS
 from beam import BeamExperiment
 import matplotlib.pyplot as plt
 from numpy.lib.function_base import meshgrid
 from utils import sample_2d_dist, plot_surface, sample_nd_dist
+from constants import *
 
 def gauss(x, y):
     return np.exp(-10*(x*x + y*y))
@@ -62,8 +63,13 @@ def sample_uniform(func, n):
 # cos =  np.linspace(0, 1, 1000)
 # plot_surface(meson.dist, e, cos, range=((meson.m, np.sqrt(beam.s)), (0., 1)))
 
-x = np.linspace(-3,3,10000)
-y = np.linspace(-3,3,10000)
-samples = sample_nd_dist(x, y, dist_func=gauss, n_samples=10000)
-plt.hist2d(samples[:,0], samples[:,1], bins=100)
+beam = BeamExperiment(beam_energy=400, nucleon_mass=1.0, \
+    max_opening_angle=DETECTOR_OPENING_ANGLE, detector_length=DETECTOR_LENGTH, \
+    detector_distance=DETECTOR_DISTANCE)
+
+sqrt_s = np.sqrt(beam.s)
+pp = np.linspace(-sqrt_s/2, sqrt_s/2, 1000)
+pt2 = np.linspace(0, beam.s/4, 10000)
+samples = sample_nd_dist(pp, pt2, dist_func=beam.test_meson_dist, n_samples=10000)
+plt.hist2d(samples[:,0], samples[:,1], bins=100, range=((-sqrt_s/2, sqrt_s/2), (0,10)))
 plt.show()

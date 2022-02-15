@@ -12,7 +12,7 @@ def main():
 
     start = time.time()
 
-    beam = BeamExperiment(beam_energy=400, nucleon_mass=58.0, \
+    beam = BeamExperiment(beam_energy=400, nucleon_mass=1., \
         max_opening_angle=DETECTOR_OPENING_ANGLE, detector_length=DETECTOR_LENGTH, \
         detector_distance=DETECTOR_DISTANCE)
 
