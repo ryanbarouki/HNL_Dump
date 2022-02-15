@@ -41,6 +41,9 @@ class Momentum4:
     
     def get_transverse_momentum(self):
         return np.sqrt(self.p[1]**2 + self.p[2]**2)
+
+    def get_parallel_momentum(self):
+        return self.p[3]
     
     def get_total_momentum(self):
         return np.sqrt(self.p[1]**2 + self.p[2]**2 + self.p[3]**2)

@@ -101,6 +101,12 @@ class HNL(Particle):
         decay_type = DecayType.CC
 
         self.acceptance = self.geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
+
+        total_p = 0
+        for momentum in self.momenta:
+            total_p += momentum.get_total_momentum()
+        print(f"Average HNL momentum after angle cut: {total_p/len(self.momenta)}")
+
         if self.beam.linear_regime:
             self.__average_propagation_factor(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
             print(f"Partial width: {self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)}")

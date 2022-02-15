@@ -1,4 +1,5 @@
 import numpy as np
+from momentum4 import Momentum4
 from particles.DsMeson import DsMeson
 from particles.DMeson import DMeson
 from particle_masses import *
@@ -8,6 +9,7 @@ from mixing_type import MixingType
 class BeamExperiment:
     def __init__(self, beam_energy, nucleon_mass, max_opening_angle, detector_length, detector_distance):
         self.s = nucleon_mass*(2*beam_energy + nucleon_mass)
+        self.beam_momentum = Momentum4.from_polar(beam_energy + nucleon_mass, 1, 0, np.sqrt(self.s))
         self.beta_cm = beam_energy/(beam_energy + nucleon_mass)
         self.gamma_cm = (beam_energy + nucleon_mass)/np.sqrt(self.s)
         self.children = []
@@ -44,27 +46,32 @@ class BeamExperiment:
         output=4.*(aux0*(aux2*((1.+(-2.*(np.abs(((s**-0.5)*aux3)))))**n)))
         return output
 
-    def meson_simple_dist(self, mass, e, cos):
-        b = 0.93
-        n = 6.
-        xf = (2*self.gamma_cm/np.sqrt(self.s))*(np.sqrt(e**2 - mass**2)*cos - self.beta_cm*e)
-        pt2 = (e**2 - mass**2)*(1 - cos**2)
-        # jacobian involves change from xf and pT^2 to E and parallel momentum in the lab frame
-        jacobian = -(4*self.gamma_cm/np.sqrt(self.s))*(e*np.sqrt(e**2 - mass**2) - self.beta_cm*cos*e**2 + self.beta_cm*cos*mass**2)
-        return jacobian*np.exp(-b*pt2)*(1-np.abs(xf))**n
-
     def test_meson_dist(self, pp, pt2):
         b = 0.93
         n = 6.
         xf = 2*pp/np.sqrt(self.s)
-
-        # if pt2 + pp**2 < self.s/4 - mass**2:
         return np.exp(-b*pt2)*(1 - np.abs(xf))**n
-        # else:
-        #     return 0
+
+    def test_get_meson_kinematics(self, mass, num_samples):
+        sqrt_s = np.sqrt(self.s)
+        pp = np.linspace(-sqrt_s/2, sqrt_s/2, 1000)
+        pt2 = np.linspace(0, self.s/4, 10000)
+        samples = generate_samples(pp, pt2, dist_func=self.test_meson_dist, n_samples=num_samples, region=lambda pp, pt2: pp**2 + pt2 < self.s/4 - mass**2)
+
+        momentum4_samples = []
+        momentum = 0
+        for sample in samples:
+            pp, pt2 = sample
+            e = np.sqrt(pp**2 + pt2 + mass**2)
+            com_momentum = Momentum4.from_e_pt_pp(e, np.sqrt(pt2), pp, 0, mass)
+            lab_momentum = com_momentum.boost(-self.beam_momentum)
+            momentum += lab_momentum.get_total_momentum()
+            momentum4_samples.append(lab_momentum)
+        print(f"Average meson momentum: {momentum/len(samples)}")
+        return momentum4_samples
     
     def __D_meson_channel(self, hnl_mass, num_samples, mixing_type):
-        momentum4_samples = self.__get_meson_kinematics(D_MASS, num_samples)
+        momentum4_samples = self.test_get_meson_kinematics(D_MASS, num_samples)
         D_meson = DMeson(beam=self, momenta=momentum4_samples)
         self.children.append(D_meson)
         D_meson.decay(hnl_mass, num_samples, mixing_type)

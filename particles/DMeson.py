@@ -21,6 +21,11 @@ class DMeson(Particle):
 
         hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)
 
+        total_p = 0
+        for momentum in hnl.momenta:
+            total_p += momentum.get_total_momentum()
+        print(f"Average HNL momentum: {total_p/len(hnl.momenta)}")
+
         hnl.decay(num_samples, mixing_type)
 
         self.children.append(hnl)

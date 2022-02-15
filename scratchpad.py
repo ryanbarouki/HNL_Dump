@@ -1,10 +1,9 @@
 import numpy as np
-from numpy.random.mtrand import sample
 from particle_masses import D_MASS
 from beam import BeamExperiment
 import matplotlib.pyplot as plt
 from numpy.lib.function_base import meshgrid
-from utils import sample_2d_dist, plot_surface, sample_nd_dist
+from utils import sample_2d_dist, plot_surface, generate_samples
 from constants import *
 
 def gauss(x, y):
@@ -67,9 +66,25 @@ beam = BeamExperiment(beam_energy=400, nucleon_mass=1.0, \
     max_opening_angle=DETECTOR_OPENING_ANGLE, detector_length=DETECTOR_LENGTH, \
     detector_distance=DETECTOR_DISTANCE)
 
+# boosted
+momenta = beam.test_get_meson_kinematics(D_MASS, 10000)
 sqrt_s = np.sqrt(beam.s)
+samples = []
+for momentum in momenta:
+    pt = momentum.get_transverse_momentum()
+    pp = momentum.get_parallel_momentum()
+    samples.append([pp, pt])
+samples = np.array(samples)
+
+fig = plt.figure()
+plt.hist2d(samples[:,0], samples[:,1], bins=100, range=((0, 200), (0,6)))
+
+# non-boosted
 pp = np.linspace(-sqrt_s/2, sqrt_s/2, 1000)
 pt2 = np.linspace(0, beam.s/4, 10000)
-samples = sample_nd_dist(pp, pt2, dist_func=beam.test_meson_dist, n_samples=10000)
+samples = generate_samples(pp, pt2, dist_func=beam.test_meson_dist, n_samples=10000)
+
+fig2 = plt.figure()
 plt.hist2d(samples[:,0], samples[:,1], bins=100, range=((-sqrt_s/2, sqrt_s/2), (0,10)))
+
 plt.show()
