@@ -3,20 +3,46 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from momentum4 import Momentum4
 
+def DEBUG_PLOT_MOMENTA(particle, range):
+    samples = []
+    for momentum in particle.momenta:
+        pt = momentum.get_transverse_momentum()
+        pp = momentum.get_parallel_momentum()
+        samples.append([pp, pt])
+    samples = np.array(samples)
+
+    fig = plt.figure()
+    plt.hist2d(samples[:,0], samples[:,1], bins=100, range=range)
+    plt.show()
+
+def DEBUG_AVERAGE_MOMENTUM(particle, text):
+    total_p = 0
+    for momentum in particle.momenta:
+        total_p += momentum.get_total_momentum()
+    print(f"{text}: {total_p/len(particle.momenta)}")
+
 def e_cos_theta_to_momentum4(samples, mass):
     momentum4_samples = []
     for sample in samples:
         e, cos_theta = sample
         momentum4_samples.append(Momentum4.from_polar(e, cos_theta, 0, mass))
     return np.array(momentum4_samples)
+
+def e_cos_theta_phi_to_momentum4(samples, mass):
+    momentum4_samples = []
+    for sample in samples:
+        e, cos_theta, phi = sample
+        momentum4_samples.append(Momentum4.from_polar(e, cos_theta, phi, mass))
+    return np.array(momentum4_samples)
     
-def get_two_body_momenta(parent, particle, other_particle, num_samples):
+def get_two_body_momenta(parent, particle, other_particle, num_samples, in_plane=False):
     e0 = (parent.m**2 + particle.m**2 - other_particle.m**2) / (2*parent.m)
-    e = np.full(1000, e0)
-    cos = np.linspace(0., 1., 1000)
-    unit_func = lambda e, cos: e/e
-    samples = generate_samples(e, cos, dist_func=unit_func, n_samples=num_samples)
-    sample_momenta = e_cos_theta_to_momentum4(samples, particle.m)
+    samples = []
+    for i in range(num_samples):
+        cos = np.random.uniform(0.0, 1.0)
+        phi = 0 if in_plane else np.random.uniform(0, 2*np.pi)
+        samples.append([e0, cos, phi])
+    sample_momenta = e_cos_theta_phi_to_momentum4(samples, particle.m)
     return sample_momenta
 
 def sample_2d_dist(dist_func, x, y, n):

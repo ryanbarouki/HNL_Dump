@@ -1,10 +1,11 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from .particle import Particle
 from .hnl import HNL
 from .electron import Electron
 from mixing_type import MixingType
 from particle_masses import *
-from utils import generate_samples, e_cos_theta_to_momentum4, get_two_body_momenta
+from utils import get_two_body_momenta, DEBUG_AVERAGE_MOMENTUM, DEBUG_PLOT_MOMENTA
 
 class DMeson(Particle):
     """D+/- meson"""
@@ -21,10 +22,8 @@ class DMeson(Particle):
 
         hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)
 
-        total_p = 0
-        for momentum in hnl.momenta:
-            total_p += momentum.get_total_momentum()
-        print(f"Average HNL momentum: {total_p/len(hnl.momenta)}")
+        DEBUG_AVERAGE_MOMENTUM(hnl, "Average HNL momentum")
+        DEBUG_PLOT_MOMENTA(hnl, ((0, 200), (0, 3)))
 
         hnl.decay(num_samples, mixing_type)
 

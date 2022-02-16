@@ -1,7 +1,7 @@
 
 import numpy as np
 from momentum4 import Momentum4
-from utils import generate_samples, e_cos_theta_to_momentum4
+from utils import generate_samples, e_cos_theta_to_momentum4, DEBUG_AVERAGE_MOMENTUM
 from detector_signal import Signal
 from .particle import Particle
 from decay_type import DecayType
@@ -96,10 +96,7 @@ class HNL(Particle):
 
         self.acceptance = self.geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
 
-        total_p = 0
-        for momentum in self.momenta:
-            total_p += momentum.get_total_momentum()
-        print(f"Average HNL momentum after angle cut: {total_p/len(self.momenta)}")
+        DEBUG_AVERAGE_MOMENTUM(self, "Average HNL momentum after angle cut")
 
         if self.beam.linear_regime:
             self.average_propagation_factor = self.__average_propagation_factor(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
