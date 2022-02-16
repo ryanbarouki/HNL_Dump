@@ -61,6 +61,7 @@ class Particle:
                 cut_momenta.append(p)
         
         acceptance =  len(cut_momenta)/len(self.momenta)
+        # replace the momenta with the cut momenta since we are only intersted in these from now on
         self.momenta = cut_momenta
         return acceptance
     

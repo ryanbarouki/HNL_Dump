@@ -37,6 +37,7 @@ def sample_2d_dist(dist_func, x, y, n):
 def generate_samples(*x, dist_func, n_samples, region=lambda *x: True) -> np.ndarray:
     X = np.meshgrid(*x)
     dist = dist_func(*X)
+    # If the points are outside the region then dist = 0 at that point
     dist = np.where(region(*X), dist, np.zeros(dist.shape))
     dist = dist / dist.sum()
     # Create a flat copy of the array

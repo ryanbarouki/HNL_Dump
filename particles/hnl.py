@@ -21,15 +21,12 @@ class HNL(Particle):
         for sample in lepton_samples:
             e_plus, e_minus = sample
             e_tot = e_plus + e_minus
-            e_nu = self.m - e_tot # Energy of the neutrino in rest frame
+            e_nu = self.m - e_tot # Energy of the neutrino in rest frame of HNL
             cos_th = np.random.uniform()
             lepton_pair_inv_mass = np.sqrt(self.m**2 - 2*self.m*e_nu)
             di_lepton_rest_momenta.append(Momentum4.from_polar(e_tot, cos_th, 0, lepton_pair_inv_mass))
-        # Cut the samples short since the sample region constraint will remove some points
-        self.momenta = self.momenta[:len(di_lepton_rest_momenta)]
         lepton_pair = Particle(m=0, beam=self.beam, parent=self)
         lepton_pair.set_momenta(di_lepton_rest_momenta).boost(self.momenta)
-
         return lepton_pair
     
     def d_gamma_majorana_dEp_dEm(self, ep, em, decay_type = DecayType.CCNC):
@@ -74,8 +71,7 @@ class HNL(Particle):
         for p in self.momenta:
             factor = length_detector*self.m*decay_rate/p.get_total_momentum()
             factors.append(factor)
-        self.average_propagation_factor = np.average(factors)
-        return self
+        return np.average(factors)
 
     def __add_non_linear_propagation_factors(self, detector_length, detector_distance, partial_decay_rate, total_decay_rate):
         factors = []
@@ -106,9 +102,10 @@ class HNL(Particle):
         print(f"Average HNL momentum after angle cut: {total_p/len(self.momenta)}")
 
         if self.beam.linear_regime:
-            self.__average_propagation_factor(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
+            self.average_propagation_factor = self.__average_propagation_factor(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
             print(f"Partial width: {self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)}")
         else:
+            #TODO this no longer works with recent changes
             partial_decay = self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)
             total_decay = self.__total_decay_rate()
             self.__add_non_linear_propagation_factors(self.beam.DETECTOR_LENGTH, self.beam.DETECTOR_DISTANCE, partial_decay, total_decay)
@@ -118,17 +115,17 @@ class HNL(Particle):
         
         lepton_pair = self.__get_lepton_pair_lab_frame(lepton_energy_samples)
 
-        samples = []
-        for momentum in lepton_pair.momenta:
-            pt = momentum.get_transverse_momentum()
-            pp = momentum.get_parallel_momentum()
-            samples.append([pp, pt])
-        samples = np.array(samples)
+        # samples = []
+        # for momentum in lepton_pair.momenta:
+        #     pt = momentum.get_transverse_momentum()
+        #     pp = momentum.get_parallel_momentum()
+        #     samples.append([pp, pt])
+        # samples = np.array(samples)
 
-        fig = plt.figure()
-        plt.hist2d(samples[:,0], samples[:,1], bins=100, range=((0, 200), (0,2)))
+        # fig = plt.figure()
+        # plt.hist2d(samples[:,0], samples[:,1], bins=100, range=((0, 200), (0,2)))
 
-        plt.show()
+        # plt.show()
 
         self.signal["e+e-v"] = [Signal(momentum) for momentum in lepton_pair.momenta]
         return self
