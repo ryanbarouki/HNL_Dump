@@ -1,7 +1,6 @@
-import numpy as np
 from .neutrino import Neutrino
 from particle_masses import *
-from utils import generate_samples, get_two_body_momenta
+from utils import get_two_body_momenta
 from .particle import Particle
 from .electron import Electron
 from .tau import Tau

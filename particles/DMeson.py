@@ -23,7 +23,7 @@ class DMeson(Particle):
         hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)
 
         DEBUG_AVERAGE_MOMENTUM(hnl, "Average HNL momentum")
-        DEBUG_PLOT_MOMENTA(hnl, ((0, 200), (0, 3)))
+        # DEBUG_PLOT_MOMENTA(hnl, ((0, 200), (0, 3)))
 
         hnl.decay(num_samples, mixing_type)
 

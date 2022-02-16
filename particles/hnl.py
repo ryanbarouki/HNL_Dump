@@ -29,7 +29,7 @@ class HNL(Particle):
         lepton_pair.set_momenta(di_lepton_rest_momenta).boost(self.momenta)
         return lepton_pair
     
-    def d_gamma_majorana_dEp_dEm(self, ep, em, decay_type = DecayType.CCNC):
+    def __electron_positron_dist_majorana(self, ep, em, decay_type = DecayType.CCNC):
         gr = SIN_WEINB**2 - 1/2
         gl = SIN_WEINB**2
         if decay_type == DecayType.CC:
@@ -40,7 +40,7 @@ class HNL(Particle):
         output = ((1+gl)**2 + gr**2)*(self.m*(ep + em) - 2*(ep**2 + em**2))
         return output
 
-    def d_gamma_dirac_dEp_dEm(self, ep, em, decay_type = DecayType.CCNC):
+    def __electron_positron_dist_dirac(self, ep, em, decay_type = DecayType.CCNC):
         gr = SIN_WEINB**2 - 1/2
         gl = SIN_WEINB**2
         if decay_type == DecayType.CC:
@@ -107,7 +107,7 @@ class HNL(Particle):
             total_decay = self.__total_decay_rate()
             self.__add_non_linear_propagation_factors(self.beam.DETECTOR_LENGTH, self.beam.DETECTOR_DISTANCE, partial_decay, total_decay)
         
-        lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.d_gamma_dirac_dEp_dEm(ep, em, decay_type=decay_type), n_samples=num_samples, \
+        lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.__electron_positron_dist_dirac(ep, em, decay_type=decay_type), n_samples=num_samples, \
             region=lambda ep, em: ep + em > self.m/2)
         
         lepton_pair = self.__get_lepton_pair_lab_frame(lepton_energy_samples)

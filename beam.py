@@ -31,32 +31,17 @@ class BeamExperiment:
             self.__Ds_meson_channel(hnl_mass, num_samples, mixing_type)
         return self
 
-    def __meson_diff_distribution(self, mass, eM, c_thetaM):
-        # params
-        b = 0.93
-        n = 6.
-        gamma_cm = self.gamma_cm
-        beta_cm = self.beta_cm
-        s = self.s
-
-        aux0=np.exp(((-b*((((1.-(c_thetaM**2))**2))*((((eM**2)-(mass**2))**2))))))
-        aux1=(eM*(np.sqrt(((eM**2)-(mass**2)))))+(c_thetaM*((mass**2)*beta_cm))
-        aux2=np.abs(((s**-0.5)*((aux1-(c_thetaM*((eM**2)*beta_cm)))*gamma_cm)))
-        aux3=(c_thetaM*((np.sqrt(((eM**2)-(mass**2))))*gamma_cm))-(eM*(beta_cm*gamma_cm))
-        output=4.*(aux0*(aux2*((1.+(-2.*(np.abs(((s**-0.5)*aux3)))))**n)))
-        return output
-
-    def test_meson_dist(self, pp, pt2):
+    def __meson_diff_distribution(self, pp, pt2):
         b = 0.93
         n = 6.
         xf = 2*pp/np.sqrt(self.s)
         return np.exp(-b*pt2)*(1 - np.abs(xf))**n
 
-    def test_get_meson_kinematics(self, mass, num_samples):
+    def __get_meson_kinematics(self, mass, num_samples):
         sqrt_s = np.sqrt(self.s)
         pp = np.linspace(-sqrt_s/2, sqrt_s/2, 1000)
         pt2 = np.linspace(0, self.s/4, 10000)
-        samples = generate_samples(pp, pt2, dist_func=self.test_meson_dist, n_samples=num_samples, region=lambda pp, pt2: pp**2 + pt2 < self.s/4 - mass**2)
+        samples = generate_samples(pp, pt2, dist_func=self.__meson_diff_distribution, n_samples=num_samples, region=lambda pp, pt2: pp**2 + pt2 < self.s/4 - mass**2)
 
         momentum4_samples = []
         momentum = 0
@@ -71,7 +56,7 @@ class BeamExperiment:
         return momentum4_samples
     
     def __D_meson_channel(self, hnl_mass, num_samples, mixing_type):
-        momentum4_samples = self.test_get_meson_kinematics(D_MASS, num_samples)
+        momentum4_samples = self.__get_meson_kinematics(D_MASS, num_samples)
         D_meson = DMeson(beam=self, momenta=momentum4_samples)
         self.children.append(D_meson)
         D_meson.decay(hnl_mass, num_samples, mixing_type)
@@ -81,17 +66,6 @@ class BeamExperiment:
         Ds_meson = DsMeson(beam=self, momenta=momentum4_samples)
         self.children.append(Ds_meson)
         Ds_meson.decay(hnl_mass, num_samples, mixing_type)  
-    
-    def __get_meson_kinematics(self, mass, num_samples):
-        e_m = np.linspace(mass, np.sqrt(self.s), 10000)
-        cos_th_m = np.linspace(0., 1., 10000)
-        # Specific non-linear sampling for meson distribution to sample points closer to 1 more finely
-        x = -1.0*(cos_th_m - 1)**4 + 1
-        # Note the need for the Jacobian factor
-        stretched_dist = lambda e, x: (-4*(1-x)**0.75)*self.__meson_diff_distribution(mass, e, x)
-        samples = generate_samples(e_m, x, dist_func=stretched_dist, n_samples=num_samples)
-        momentum4_samples = e_cos_theta_to_momentum4(samples, mass)
-        return momentum4_samples
     
     def find_instances_of_type(self, type, current=None, instances=[]):
         if current == None:

@@ -67,7 +67,7 @@ beam = BeamExperiment(beam_energy=400, nucleon_mass=1.0, \
     detector_distance=DETECTOR_DISTANCE)
 
 # boosted
-momenta = beam.test_get_meson_kinematics(D_MASS, 10000)
+momenta = beam.__get_meson_kinematics(D_MASS, 10000)
 sqrt_s = np.sqrt(beam.s)
 samples = []
 for momentum in momenta:
@@ -82,7 +82,7 @@ plt.hist2d(samples[:,0], samples[:,1], bins=100, range=((0, 200), (0,6)))
 # non-boosted
 pp = np.linspace(-sqrt_s/2, sqrt_s/2, 1000)
 pt2 = np.linspace(0, beam.s/4, 10000)
-samples = generate_samples(pp, pt2, dist_func=beam.test_meson_dist, n_samples=10000)
+samples = generate_samples(pp, pt2, dist_func=beam.__meson_diff_distribution, n_samples=10000)
 
 fig2 = plt.figure()
 plt.hist2d(samples[:,0], samples[:,1], bins=100, range=((-sqrt_s/2, sqrt_s/2), (0,10)))
