@@ -61,11 +61,7 @@ class SignalProcessor:
         return len(cut_signal) / total_signal, cut_signal
 
     def __get_normalised_hnl_flux_from_D_mesons(self, hnl_mass):
-        # factor of 2 to include anti-neutrinos
-        flux_density = 2*32e-9 # electron neutrinos per proton per micro sr
-        opening_angle = 4*np.pi*10**6#46 # micro sr
-        pot = 2.2e18 # protons on target
-        electron_nu_massless_flux = flux_density*pot*opening_angle
+        electron_nu_massless_flux = 4.1e-4 * 2e18
         normalisation_D_mesons = electron_nu_massless_flux*(CS.P_TO_DPDM_X*BR.D_TO_E_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
         # factor of 3 for the 3 decay channels (no need to treat them individually)
         return 3*normalisation_D_mesons

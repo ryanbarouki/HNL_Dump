@@ -1,7 +1,7 @@
 
 import numpy as np
 from momentum4 import Momentum4
-from utils import generate_samples, e_cos_theta_to_momentum4, DEBUG_AVERAGE_MOMENTUM
+from utils import generate_samples, DEBUG_AVERAGE_MOMENTUM
 from detector_signal import Signal
 from .particle import Particle
 from decay_type import DecayType
@@ -111,18 +111,6 @@ class HNL(Particle):
             region=lambda ep, em: ep + em > self.m/2)
         
         lepton_pair = self.__get_lepton_pair_lab_frame(lepton_energy_samples)
-
-        # samples = []
-        # for momentum in lepton_pair.momenta:
-        #     pt = momentum.get_transverse_momentum()
-        #     pp = momentum.get_parallel_momentum()
-        #     samples.append([pp, pt])
-        # samples = np.array(samples)
-
-        # fig = plt.figure()
-        # plt.hist2d(samples[:,0], samples[:,1], bins=100, range=((0, 200), (0,2)))
-
-        # plt.show()
 
         self.signal["e+e-v"] = [Signal(momentum) for momentum in lepton_pair.momenta]
         return self
