@@ -26,8 +26,7 @@ class DsMeson(Particle):
 
         if isinstance(other_particle, HNL):
             hnl_rest_momenta = self.__get_two_body_momenta(other_particle, tau, num_samples)
-            other_particle.set_momenta(hnl_rest_momenta).boost(self.momenta) \
-                                         .geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
+            other_particle.set_momenta(hnl_rest_momenta).boost(self.momenta)
             other_particle.decay(num_samples, mixing_type)
 
         self.children.append(other_particle)
@@ -39,8 +38,7 @@ class DsMeson(Particle):
         hnl = HNL(hnl_mass, beam=self.beam, parent=self)
         
         hnl_rest_momenta = get_two_body_momenta(self, hnl, electron, num_samples)
-        hnl.set_momenta(hnl_rest_momenta).boost(self.momenta) \
-                                        .geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
+        hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)
         hnl.decay(num_samples, mixing_type)
 
         self.children.append(hnl)

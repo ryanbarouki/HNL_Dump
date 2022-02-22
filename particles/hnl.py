@@ -73,7 +73,7 @@ class HNL(Particle):
             factors.append(factor)
         return np.average(factors)
 
-    def __add_non_linear_propagation_factors(self, detector_length, detector_distance, partial_decay_rate, total_decay_rate):
+    def __avg_non_linear_propagation_factor(self, detector_length, detector_distance, partial_decay_rate, total_decay_rate):
         factors = []
         for p in self.momenta:
             ptot = p.get_total_momentum()
@@ -81,8 +81,7 @@ class HNL(Particle):
             factor2 = 1 - np.exp(-detector_length*self.m/(ptot*total_decay_rate))
             factor = factor1*factor2*(total_decay_rate/partial_decay_rate)
             factors.append(factor)
-        self.propagation_factors = factors
-        return self
+        return np.average(factors)
 
     def __total_decay_rate(self):
         # TODO implement this
@@ -105,7 +104,7 @@ class HNL(Particle):
             #TODO this no longer works with recent changes
             partial_decay = self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)
             total_decay = self.__total_decay_rate()
-            self.__add_non_linear_propagation_factors(self.beam.DETECTOR_LENGTH, self.beam.DETECTOR_DISTANCE, partial_decay, total_decay)
+            self.average_propagation_factor = self.__avg_non_linear_propagation_factor(self.beam.DETECTOR_LENGTH, self.beam.DETECTOR_DISTANCE, partial_decay, total_decay)
         
         lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.__electron_positron_dist_dirac(ep, em, decay_type=decay_type), n_samples=num_samples, \
             region=lambda ep, em: ep + em > self.m/2)
