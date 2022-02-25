@@ -22,6 +22,7 @@ class BeamExperiment:
     def with_mixing(self, mixing_squared):
         self.linear_regime = False
         self.mixing_squared = mixing_squared
+        return self
 
     def start_dump(self, hnl_mass, num_samples, mixing_type: MixingType):
         if mixing_type == MixingType.electron:
@@ -67,9 +68,11 @@ class BeamExperiment:
         self.children.append(Ds_meson)
         Ds_meson.decay(hnl_mass, num_samples, mixing_type)  
     
-    def find_instances_of_type(self, type, current=None, instances=[]):
+    def find_instances_of_type(self, type, current=None, instances=None):
         if current == None:
             current = self
+        if instances == None:
+            instances = []
         if isinstance(current, type):
             instances.append(current)
         if current.children:

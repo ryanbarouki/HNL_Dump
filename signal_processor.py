@@ -7,7 +7,7 @@ class SignalProcessor:
     def __init__(self, beam) -> None:
         self.beam = beam
     
-    def get_bound(self):
+    def get_upper_bound(self):
         hnls = self.beam.find_instances_of_type(HNL)
         channel = "e+e-v"
         if len(hnls) == 0:
@@ -35,14 +35,20 @@ class SignalProcessor:
         hnls = self.beam.find_instances_of_type(HNL)
         if len(hnls) == 0:
             raise Exception("No HNLs!")
-        cut_signal = self.__apply_BEBC_cuts(hnls, channel="e+e-v")
-        normalised_hnl_decays = self.__get_normalised_hnl_flux_from_D_mesons(cut_signal, hnl_mass=hnls[0].m)
-        observed_events = 2
-        return normalised_hnl_decays < observed_events
+        efficiency, cut_signal = self.__apply_BEBC_cuts(hnls, channel="e+e-v")
+        hnl = hnls[0] #TODO: this won't work for multiple sources of HNL but we need the correct weighting
+
+        avg_prop_factor = hnl.average_propagation_factor
+        acceptance = hnl.acceptance
+        normalisation = self.__get_normalised_hnl_flux_from_D_mesons(hnl_mass=hnl.m)
+        observed_events = 3.5
+        total_flux = normalisation*avg_prop_factor*efficiency*acceptance
+        return total_flux < observed_events
 
     def __apply_BEBC_cuts(self, hnls, channel) -> np.ndarray:
         cut_signal = []
         total_signal = 0
+        print(len(hnls))
         for hnl in hnls:
             if not hnl.signal:
                 raise Exception("No signal object!")

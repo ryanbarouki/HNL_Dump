@@ -17,7 +17,7 @@ def main():
         detector_distance=DETECTOR_DISTANCE)
 
     beam.start_dump(hnl_mass, num_samples=num_samples, mixing_type=mixing_type)
-    upper_bound_squared, cut_signal = SignalProcessor(beam).get_bound()
+    upper_bound_squared, cut_signal = SignalProcessor(beam).get_upper_bound()
     print(f"U squared: {upper_bound_squared}")
 
     end = time.time()

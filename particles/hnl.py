@@ -83,9 +83,15 @@ class HNL(Particle):
             factors.append(factor)
         return np.average(factors)
 
-    def __total_decay_rate(self):
-        # TODO implement this
-        pass
+    def __total_decay_rate(self, mixing_type):
+        c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
+        c2 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
+        if mixing_type == MixingType.electron:
+            return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(c1 + c2 + 1)
+        elif mixing_type == MixingType.tau:
+            # TODO double check this 
+            return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(2*c1)
+            
 
     def decay(self, num_samples, mixing_type: MixingType):
         # Decay N -> e+ e- v
@@ -101,9 +107,8 @@ class HNL(Particle):
             self.average_propagation_factor = self.__average_propagation_factor(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
             print(f"Partial width: {self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)}")
         else:
-            #TODO this no longer works with recent changes
             partial_decay = self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)
-            total_decay = self.__total_decay_rate()
+            total_decay = self.__total_decay_rate(mixing_type)
             self.average_propagation_factor = self.__avg_non_linear_propagation_factor(self.beam.DETECTOR_LENGTH, self.beam.DETECTOR_DISTANCE, partial_decay, total_decay)
         
         lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.__electron_positron_dist_dirac(ep, em, decay_type=decay_type), n_samples=num_samples, \
