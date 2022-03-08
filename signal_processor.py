@@ -10,16 +10,24 @@ import branching_ratios as BR
 import cross_sections as CS
 
 ELECTRON_NU_MASSLESS_FLUX = 4.1e-4 * 2e18
+OBSERVED_EVENTS = 3.5
 class SignalProcessor:
     def __init__(self, beam) -> None:
         self.beam = beam
     
     def get_upper_bound(self):
         hnls = self.beam.find_instances_of_type(HNL)
+        # TODO this channel string is everywhere - separately defined!
         channel = "e+e-v"
         if len(hnls) == 0:
             raise Exception("No HNLs!")
 
+        total_decays, cut_signal = self.get_total_decays(hnls, channel)
+
+        upper_bound_squared = np.sqrt(OBSERVED_EVENTS/total_decays)
+        return upper_bound_squared, cut_signal
+
+    def get_total_decays(self, hnls, channel):
         total_decays = 0
         for hnl in hnls:
             efficiency, cut_signal = self.__apply_BEBC_cuts(hnl, channel=channel)
@@ -40,23 +48,14 @@ class SignalProcessor:
                     total_flux = self.__get_normalised_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
 
             total_decays += total_flux*prop_factor*efficiency*acceptance
-
-        upper_bound_squared = np.sqrt(3.5/total_decays)
-        return upper_bound_squared, cut_signal
+        return total_decays, cut_signal
 
     def is_mixing_too_small(self):
         hnls = self.beam.find_instances_of_type(HNL)
         if len(hnls) == 0:
             raise Exception("No HNLs!")
-        efficiency, cut_signal = self.__apply_BEBC_cuts(hnls, channel="e+e-v")
-        hnl = hnls[0] #TODO: this won't work for multiple sources of HNL but we need the correct weighting
-
-        avg_prop_factor = hnl.average_propagation_factor
-        acceptance = hnl.acceptance
-        normalisation = self.__get_normalised_hnl_flux_from_DpDm_mesons(hnl_mass=hnl.m)
-        observed_events = 3.5
-        total_flux = normalisation*avg_prop_factor*efficiency*acceptance
-        return total_flux < observed_events
+        total_decays, cut_signal = self.get_total_decays(hnls, channel="e+e-v")
+        return total_decays < OBSERVED_EVENTS
 
     def __apply_BEBC_cuts(self, hnl, channel) -> np.ndarray:
         cut_signal = []
