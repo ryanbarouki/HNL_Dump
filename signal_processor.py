@@ -3,6 +3,7 @@ from particles.hnl import HNL
 import branching_ratios as BR
 import cross_sections as CS
 
+ELECTRON_NU_MASSLESS_FLUX = 4.1e-4 * 2e18
 class SignalProcessor:
     def __init__(self, beam) -> None:
         self.beam = beam
@@ -12,7 +13,9 @@ class SignalProcessor:
         channel = "e+e-v"
         if len(hnls) == 0:
             raise Exception("No HNLs!")
-        efficiency, cut_signal = self.__apply_BEBC_cuts(hnls, channel=channel)
+        # TODO loop over HNLs here and add with appropriate normalisation
+        # TODO check mixing type etc.
+        efficiency, cut_signal = self.__apply_BEBC_cuts(hnls, channel=channel) # TODO change this to only take a single HNL source
         prop_factor = 0
         acceptance = 0
         
@@ -25,7 +28,7 @@ class SignalProcessor:
         acceptance = acceptance/len(hnls)
         print(f"avg propagation factor: {avg_prop_factor}")
         print(f"Acceptance: {acceptance}")
-        total_flux = self.__get_normalised_hnl_flux_from_D_mesons(hnl_mass=hnls[0].m)
+        total_flux = self.__get_normalised_hnl_flux_from_DpDm_mesons(hnl_mass=hnls[0].m)
         total_decays = total_flux*avg_prop_factor*efficiency*acceptance
         upper_bound_squared = np.sqrt(3.5/total_decays)
 
@@ -40,7 +43,7 @@ class SignalProcessor:
 
         avg_prop_factor = hnl.average_propagation_factor
         acceptance = hnl.acceptance
-        normalisation = self.__get_normalised_hnl_flux_from_D_mesons(hnl_mass=hnl.m)
+        normalisation = self.__get_normalised_hnl_flux_from_DpDm_mesons(hnl_mass=hnl.m)
         observed_events = 3.5
         total_flux = normalisation*avg_prop_factor*efficiency*acceptance
         return total_flux < observed_events
@@ -66,8 +69,17 @@ class SignalProcessor:
                 raise Exception("Invalid channel or channel not implemented")
         return len(cut_signal) / total_signal, cut_signal
 
-    def __get_normalised_hnl_flux_from_D_mesons(self, hnl_mass):
-        electron_nu_massless_flux = 4.1e-4 * 2e18
-        normalisation_D_mesons = electron_nu_massless_flux*(CS.P_TO_DPDM_X*BR.D_TO_E_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
-        # factor of 3 for the 3 decay channels (no need to treat them individually)
+    def __get_normalised_hnl_flux_from_DpDm_mesons(self, hnl_mass):
+        normalisation_D_mesons = ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DPDM_X*BR.D_TO_E_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
+        # factor of 3 for the 3 decay channels of HNLs (no need to treat them individually)
+        return 3*normalisation_D_mesons
+
+    def __get_normalised_hnl_flux_from_Ds_mesons(self, hnl_mass):
+        normalisation_D_mesons = ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DSDS_X*BR.DS_TO_TAU_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
+        # factor of 3 for the 3 decay channels of HNLs (no need to treat them individually)
+        return 3*normalisation_D_mesons
+
+    def __get_normalised_hnl_flux_from_tau(self, hnl_mass):
+        normalisation_D_mesons = ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DSDS_X*BR.DS_TO_TAU_X*BR.TAU_TO_PI_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
+        # factor of 3 for the 3 decay channels of HNLs (no need to treat them individually)
         return 3*normalisation_D_mesons
