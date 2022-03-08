@@ -10,8 +10,10 @@ from constants import *
 import matplotlib.pyplot as plt
 
 class HNL(Particle):
-    def __init__(self, mass, beam=None, parent=None, momenta=[]):
+    def __init__(self, mass, mixing_type, beam=None, parent=None, momenta=[], decay_mode=None):
         super().__init__(mass, beam, parent, momenta)
+        self.mixing_type = mixing_type
+        self.decay_mode = decay_mode
         self.signal = {}
 
 

@@ -4,6 +4,7 @@ from .particle import Particle
 from .pion import Pion
 from particle_masses import *
 from utils import generate_samples, e_cos_theta_to_momentum4, get_two_body_momenta
+from .tau_decay_modes import TauDecayModes
 
 class Tau(Particle):
     def __init__(self, beam=None, parent=None, momenta=[]):
@@ -11,8 +12,8 @@ class Tau(Particle):
     
     def decay(self, hnl_mass, num_samples, mixing_type):
         #TODO make sure the masses make sense for the decays
-        hnl = HNL(hnl_mass, beam=self.beam, parent=self)
-        hnl2body = HNL(hnl_mass, beam=self.beam, parent=self)
+        hnl = HNL(hnl_mass, mixing_type, beam=self.beam, parent=self, decay_mode=TauDecayModes.hnl_lepton_nu)
+        hnl2body = HNL(hnl_mass, mixing_type, beam=self.beam, parent=self, decay_mode=TauDecayModes.hnl_pi)
         pion = Pion(beam=self.beam, parent=self)
         e_max = (self.m**2 + hnl_mass**2)/(2*self.m)
         e = np.linspace(hnl_mass, e_max, 1_000)
@@ -22,7 +23,7 @@ class Tau(Particle):
 
         hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)
 
-        hnl_rest_momenta_two_body = get_two_body_momenta(self, hnl, pion)
+        hnl_rest_momenta_two_body = get_two_body_momenta(self, hnl, pion, num_samples)
         hnl2body.set_momenta(hnl_rest_momenta_two_body).boost(self.momenta)
 
         hnl.decay(num_samples=num_samples, mixing_type=mixing_type)

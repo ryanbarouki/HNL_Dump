@@ -14,7 +14,7 @@ class DMeson(Particle):
 
     def decay(self, hnl_mass, num_samples, mixing_type: MixingType):
         # D -> N + electron (muon but not implemented)
-        hnl = HNL(hnl_mass, beam=self.beam, parent=self)
+        hnl = HNL(hnl_mass, mixing_type, beam=self.beam, parent=self)
         electron = Electron(parent=self, beam=self.beam)
 
         # set the kinematics of the children

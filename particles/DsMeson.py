@@ -6,6 +6,7 @@ from .electron import Electron
 from .tau import Tau
 from .hnl import HNL
 from mixing_type import MixingType
+from utils import get_two_body_momenta
 
 class DsMeson(Particle):
     def __init__(self, beam=None, parent=None, momenta=[]):
@@ -16,16 +17,16 @@ class DsMeson(Particle):
         other_particle = Neutrino(parent=self, beam=self.beam)
         if TAU_MASS + hnl_mass < DS_MASS:
             # HNL mass is small enough to produce an HNL here
-            other_particle = HNL(hnl_mass, beam=self.beam, parent=self)
+            other_particle = HNL(hnl_mass, mixing_type, beam=self.beam, parent=self)
         
-        tau_rest_momenta = self.__get_two_body_momenta(tau, other_particle, num_samples)
+        tau_rest_momenta = get_two_body_momenta(self, tau, other_particle, num_samples)
 
         tau.set_momenta(tau_rest_momenta).boost(self.momenta)
 
         tau.decay(hnl_mass, num_samples, mixing_type)
 
         if isinstance(other_particle, HNL):
-            hnl_rest_momenta = self.__get_two_body_momenta(other_particle, tau, num_samples)
+            hnl_rest_momenta = get_two_body_momenta(self, other_particle, tau, num_samples)
             other_particle.set_momenta(hnl_rest_momenta).boost(self.momenta)
             other_particle.decay(num_samples, mixing_type)
 
@@ -35,7 +36,7 @@ class DsMeson(Particle):
 
     def __decay_electron_mixing(self, hnl_mass, num_samples, mixing_type):
         electron = Electron(parent=self, beam=self.beam)
-        hnl = HNL(hnl_mass, beam=self.beam, parent=self)
+        hnl = HNL(hnl_mass, mixing_type, beam=self.beam, parent=self)
         
         hnl_rest_momenta = get_two_body_momenta(self, hnl, electron, num_samples)
         hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)

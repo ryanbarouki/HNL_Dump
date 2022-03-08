@@ -1,5 +1,11 @@
+from multiprocessing import parent_process
 import numpy as np
+from particles.tau_decay_modes import TauDecayModes
+from mixing_type import MixingType
 from particles.hnl import HNL
+from particles.tau import Tau
+from particles.DMeson import DMeson
+from particles.DsMeson import DsMeson 
 import branching_ratios as BR
 import cross_sections as CS
 
@@ -13,25 +19,29 @@ class SignalProcessor:
         channel = "e+e-v"
         if len(hnls) == 0:
             raise Exception("No HNLs!")
-        # TODO loop over HNLs here and add with appropriate normalisation
-        # TODO check mixing type etc.
-        efficiency, cut_signal = self.__apply_BEBC_cuts(hnls, channel=channel) # TODO change this to only take a single HNL source
-        prop_factor = 0
-        acceptance = 0
-        
-        #TODO this is wrong, there should be some weighting
+
+        total_decays = 0
         for hnl in hnls:
-            acceptance += hnl.acceptance
-            prop_factor += hnl.average_propagation_factor 
+            efficiency, cut_signal = self.__apply_BEBC_cuts(hnl, channel=channel)
+            prop_factor = hnl.average_propagation_factor
+            acceptance = hnl.acceptance
+            total_flux = 0
+            print(f"Propagation factor: {prop_factor}")
+            print(f"Acceptance: {acceptance}")
 
-        avg_prop_factor = prop_factor/len(hnls)
-        acceptance = acceptance/len(hnls)
-        print(f"avg propagation factor: {avg_prop_factor}")
-        print(f"Acceptance: {acceptance}")
-        total_flux = self.__get_normalised_hnl_flux_from_DpDm_mesons(hnl_mass=hnls[0].m)
-        total_decays = total_flux*avg_prop_factor*efficiency*acceptance
+            if hnl.mixing_type == MixingType.electron:
+                if isinstance(hnl.parent, DMeson):
+                    total_flux = self.__get_normalised_hnl_flux_from_DpDm_mesons(hnl_mass=hnl.m)
+            elif hnl.mixing_type == MixingType.tau:
+                if isinstance(hnl.parent, Tau):
+                    if hnl.decay_mode == TauDecayModes.hnl_pi:
+                        total_flux = self.__get_normalised_hnl_flux_from_tau_two_body(hnl_mass=hnl.m)
+                elif isinstance(hnl.parent, DsMeson):
+                    total_flux = self.__get_normalised_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
+
+            total_decays += total_flux*prop_factor*efficiency*acceptance
+
         upper_bound_squared = np.sqrt(3.5/total_decays)
-
         return upper_bound_squared, cut_signal
 
     def is_mixing_too_small(self):
@@ -48,25 +58,23 @@ class SignalProcessor:
         total_flux = normalisation*avg_prop_factor*efficiency*acceptance
         return total_flux < observed_events
 
-    def __apply_BEBC_cuts(self, hnls, channel) -> np.ndarray:
+    def __apply_BEBC_cuts(self, hnl, channel) -> np.ndarray:
         cut_signal = []
         total_signal = 0
-        print(len(hnls))
-        for hnl in hnls:
-            if not hnl.signal:
-                raise Exception("No signal object!")
-            if channel == "e+e-v":
-                e_min = 0.8 #GeV
-                mT_max = 1.85 #GeV
-                total_signal += len(hnl.signal[channel])
-                for signal in hnl.signal[channel]:
-                    energy = signal.momentum.get_energy()
-                    transverse_mass = signal.momentum.get_transverse_mass()
-                    if energy > e_min and transverse_mass < mT_max:
-                        cut_signal.append(signal)
-                print(f"Efficiency: {len(cut_signal)/len(hnl.signal[channel])}")
-            else:
-                raise Exception("Invalid channel or channel not implemented")
+        if not hnl.signal:
+            raise Exception("No signal object!")
+        if channel == "e+e-v":
+            e_min = 0.8 #GeV
+            mT_max = 1.85 #GeV
+            total_signal += len(hnl.signal[channel])
+            for signal in hnl.signal[channel]:
+                energy = signal.momentum.get_energy()
+                transverse_mass = signal.momentum.get_transverse_mass()
+                if energy > e_min and transverse_mass < mT_max:
+                    cut_signal.append(signal)
+            print(f"Efficiency: {len(cut_signal)/len(hnl.signal[channel])}")
+        else:
+            raise Exception("Invalid channel or channel not implemented")
         return len(cut_signal) / total_signal, cut_signal
 
     def __get_normalised_hnl_flux_from_DpDm_mesons(self, hnl_mass):
@@ -79,7 +87,7 @@ class SignalProcessor:
         # factor of 3 for the 3 decay channels of HNLs (no need to treat them individually)
         return 3*normalisation_D_mesons
 
-    def __get_normalised_hnl_flux_from_tau(self, hnl_mass):
+    def __get_normalised_hnl_flux_from_tau_two_body(self, hnl_mass):
         normalisation_D_mesons = ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DSDS_X*BR.DS_TO_TAU_X*BR.TAU_TO_PI_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
         # factor of 3 for the 3 decay channels of HNLs (no need to treat them individually)
         return 3*normalisation_D_mesons
