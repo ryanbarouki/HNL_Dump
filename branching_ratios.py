@@ -47,7 +47,7 @@ def DS_TO_ELECTRON_HNL(mN):
     y = (mN/DS_MASS)**2
     l_til = l_tilde(x, y)
     h_til = h_tilde(x, y)
-    DS_TO_E_NUE = 8.3e-5 # TODO find value 
+    DS_TO_E_NUE = 5.49e-3*(ELECTRON_MASS/MUON_MASS)**2 
     return DS_TO_E_NUE*np.sqrt(l_til)*h_til
 
 def TAU_TO_PI_HNL(mN):
