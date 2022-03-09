@@ -99,7 +99,7 @@ class HNL(Particle):
         # Decay N -> e+ e- v
         e_l_plus = np.linspace(0, self.m/2, 1000)
         e_l_minus = np.linspace(0, self.m/2, 1000)
-        decay_type = DecayType.CC
+        decay_type = DecayType.CCNC
 
         self.acceptance = self.geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
 

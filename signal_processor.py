@@ -40,12 +40,18 @@ class SignalProcessor:
             if hnl.mixing_type == MixingType.electron:
                 if isinstance(hnl.parent, DMeson):
                     total_flux = self.__get_normalised_hnl_flux_from_DpDm_mesons(hnl_mass=hnl.m)
+                    print("Flux norm (D): {:e}".format(total_flux))
+                elif isinstance(hnl.parent, DsMeson):
+                    total_flux = self.__get_normalised_electron_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
+                    print("Flux norm (Ds): {:e}".format(total_flux))
             elif hnl.mixing_type == MixingType.tau:
                 if isinstance(hnl.parent, Tau):
                     if hnl.decay_mode == TauDecayModes.hnl_pi:
                         total_flux = self.__get_normalised_hnl_flux_from_tau_two_body(hnl_mass=hnl.m)
+                        print("Flux norm (tau 2-body): {:e}".format(total_flux))
                 elif isinstance(hnl.parent, DsMeson):
-                    total_flux = self.__get_normalised_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
+                    total_flux = self.__get_normalised_tau_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
+                    print("Flux norm (Ds): {:e}".format(total_flux))
 
             total_decays += total_flux*prop_factor*efficiency*acceptance
         return total_decays, cut_signal
@@ -81,8 +87,13 @@ class SignalProcessor:
         # factor of 3 for the 3 decay channels of HNLs (no need to treat them individually)
         return 3*normalisation_D_mesons
 
-    def __get_normalised_hnl_flux_from_Ds_mesons(self, hnl_mass):
+    def __get_normalised_tau_hnl_flux_from_Ds_mesons(self, hnl_mass):
         normalisation_D_mesons = ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DSDS_X*BR.DS_TO_TAU_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
+        # factor of 3 for the 3 decay channels of HNLs (no need to treat them individually)
+        return 3*normalisation_D_mesons
+
+    def __get_normalised_electron_hnl_flux_from_Ds_mesons(self, hnl_mass):
+        normalisation_D_mesons = ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DSDS_X*BR.DS_TO_ELECTRON_HNL(hnl_mass))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
         # factor of 3 for the 3 decay channels of HNLs (no need to treat them individually)
         return 3*normalisation_D_mesons
 

@@ -42,10 +42,19 @@ def DS_TO_TAU_HNL(mN):
     DS_TO_TAU_NUTAU = 5.48/100 # +/- 0.23%
     return DS_TO_TAU_NUTAU*np.sqrt(l_til)*h_til
 
+def DS_TO_ELECTRON_HNL(mN):
+    x = (ELECTRON_MASS/DS_MASS)**2
+    y = (mN/DS_MASS)**2
+    l_til = l_tilde(x, y)
+    h_til = h_tilde(x, y)
+    DS_TO_E_NUE = 8.3e-5 # TODO find value 
+    return DS_TO_E_NUE*np.sqrt(l_til)*h_til
+
 def TAU_TO_PI_HNL(mN):
     x = (PION_MASS/TAU_MASS)**2
     y = (mN/TAU_MASS)**2
     l_til = l_tilde(x, y)
     h_til = h_tilde(x, y)
     TAU_TO_PI_NUTAU = 10.82/100 # +/- 0.05%
-    return TAU_TO_PI_NUTAU*np.sqrt(l_til)*h_til
+    # TODO this is wrong. Replace with correct formula
+    return TAU_TO_PI_NUTAU*np.sqrt(l_til)*h_til*(1-y)/y
