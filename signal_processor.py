@@ -1,4 +1,3 @@
-from multiprocessing import parent_process
 import numpy as np
 from particles.tau_decay_modes import TauDecayModes
 from mixing_type import MixingType
