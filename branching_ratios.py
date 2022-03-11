@@ -54,7 +54,6 @@ def TAU_TO_PI_HNL(mN):
     x = (PION_MASS/TAU_MASS)**2
     y = (mN/TAU_MASS)**2
     l_til = l_tilde(x, y)
-    h_til = h_tilde(x, y)
+    g = lambda x,y: ((1-y)**2 - x*(1+y))/(1-x)
     TAU_TO_PI_NUTAU = 10.82/100 # +/- 0.05%
-    # TODO this is wrong. Replace with correct formula
-    return TAU_TO_PI_NUTAU*np.sqrt(l_til)*h_til*(1-y)/y
+    return TAU_TO_PI_NUTAU*np.sqrt(l_til)*g(x,y)
