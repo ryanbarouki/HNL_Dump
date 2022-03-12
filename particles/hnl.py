@@ -79,9 +79,9 @@ class HNL(Particle):
         factors = []
         for p in self.momenta:
             ptot = p.get_total_momentum()
-            factor1 = np.exp(-detector_distance*self.m/(ptot*total_decay_rate))
-            factor2 = 1 - np.exp(-detector_length*self.m/(ptot*total_decay_rate))
-            factor = factor1*factor2*(total_decay_rate/partial_decay_rate)
+            factor1 = np.exp(-detector_distance*self.m*total_decay_rate/ptot)
+            factor2 = 1 - np.exp(-detector_length*self.m*total_decay_rate/ptot)
+            factor = factor1*factor2*(partial_decay_rate/total_decay_rate)
             factors.append(factor)
         return np.average(factors)
 

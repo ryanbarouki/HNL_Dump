@@ -60,6 +60,7 @@ class SignalProcessor:
         if len(hnls) == 0:
             raise Exception("No HNLs!")
         total_decays, cut_signal = self.get_total_decays(hnls, channel="e+e-v")
+        print(f"Total decays: {total_decays}")
         return total_decays < OBSERVED_EVENTS
 
     def __apply_BEBC_cuts(self, hnl, channel) -> np.ndarray:

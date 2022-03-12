@@ -21,10 +21,11 @@ def is_mixing_too_small(hnl_mass, mixing_squared, num_samples, mixing_type):
 
 def main():
     hnl_masses = np.linspace(0.2, 1.2, 10)
-    mixings_squared = np.linspace(10e-1, 1, 10)
+    mixings_squared = np.linspace(1e-4, 1e-3, 10)
 
-    for mixing in mixings_squared:
-        is_mixing_too_small(1.2, mixing, 10000, MixingType.electron)
+    # for mixing in mixings_squared:
+    #     is_mixing_too_small(1.5, mixing, 10000, MixingType.electron)
 
+    is_mixing_too_small(1.5, 6.21e-3, 10000, MixingType.electron)
 if __name__ == "__main__":
     main()
