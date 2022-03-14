@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from momentum4 import Momentum4
+from logger import Logger
 
 def DEBUG_PLOT_MOMENTA(particle, range):
     samples = []
@@ -19,7 +20,7 @@ def DEBUG_AVERAGE_MOMENTUM(particle, text):
     total_p = 0
     for momentum in particle.momenta:
         total_p += momentum.get_total_momentum()
-    print(f"{text}: {total_p/len(particle.momenta)}")
+    Logger().log(f"{text}: {total_p/len(particle.momenta)}")
 
 def e_cos_theta_to_momentum4(samples, mass):
     momentum4_samples = []

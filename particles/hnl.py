@@ -7,7 +7,7 @@ from .particle import Particle
 from decay_type import DecayType
 from mixing_type import MixingType
 from constants import *
-import matplotlib.pyplot as plt
+from logger import Logger
 
 class HNL(Particle):
     def __init__(self, mass, mixing_type, beam=None, parent=None, momenta=[], decay_mode=None):
@@ -107,7 +107,7 @@ class HNL(Particle):
 
         if self.beam.linear_regime:
             self.average_propagation_factor = self.__average_propagation_factor(self.beam.DETECTOR_LENGTH, self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type))
-            print(f"Partial width: {self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)}")
+            Logger().log(f"Partial width: {self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)}")
         else:
             partial_decay = self.__partial_decay_rate_to_lepton_pair(mixing_type, decay_type=decay_type)
             total_decay = self.__total_decay_rate(mixing_type)

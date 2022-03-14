@@ -5,7 +5,7 @@ from particles.DMeson import DMeson
 from particle_masses import *
 from utils import generate_samples, e_cos_theta_to_momentum4
 from mixing_type import MixingType
-
+from logger import Logger
 class BeamExperiment:
     def __init__(self, beam_energy, nucleon_mass, max_opening_angle, detector_length, detector_distance):
         self.s = nucleon_mass*(2*beam_energy + nucleon_mass)
@@ -53,7 +53,7 @@ class BeamExperiment:
             lab_momentum = com_momentum.boost(-self.beam_momentum)
             momentum += lab_momentum.get_total_momentum()
             momentum4_samples.append(lab_momentum)
-        print(f"Average meson momentum: {momentum/len(samples)}")
+        Logger().log(f"Average meson momentum: {momentum/len(samples)}")
         return momentum4_samples
     
     def __D_meson_channel(self, hnl_mass, num_samples, mixing_type):

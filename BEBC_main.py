@@ -6,6 +6,7 @@ from mixing_type import MixingType
 import time
 from constants import *
 from signal_processor import SignalProcessor
+from logger import Logger
 
 def main():
     hnl_mass, num_samples, plot, mixing_type = parse_arguments()
@@ -47,4 +48,5 @@ def parse_arguments():
     return hnl_mass,num_samples,plot,mixing_type
 
 if __name__ == "__main__":
+    logger = Logger(debug=False)
     main()
