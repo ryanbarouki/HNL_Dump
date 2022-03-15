@@ -28,8 +28,8 @@ def main():
         plot_signal(cut_signal)
 
 def plot_signal(cut_signal):
-    energies = [signal.momentum.get_energy() for signal in cut_signal]
-    pT = [signal.momentum.get_transverse_momentum() for signal in cut_signal]
+    energies = [momentum.get_energy() for momentum in cut_signal]
+    pT = [momentum.get_transverse_momentum() for momentum in cut_signal]
     plt.hist2d(energies, pT, bins=100, range=[[0,250], [0, 2]])
     plt.show()
 

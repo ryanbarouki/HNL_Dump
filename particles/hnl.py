@@ -2,7 +2,6 @@
 import numpy as np
 from momentum4 import Momentum4
 from utils import generate_samples, DEBUG_AVERAGE_MOMENTUM
-from detector_signal import Signal
 from .particle import Particle
 from decay_type import DecayType
 from mixing_type import MixingType
@@ -118,5 +117,5 @@ class HNL(Particle):
         
         lepton_pair = self.__get_lepton_pair_lab_frame(lepton_energy_samples)
 
-        self.signal["e+e-v"] = [Signal(momentum) for momentum in lepton_pair.momenta]
+        self.signal["e+e-v"] = lepton_pair.momenta
         return self

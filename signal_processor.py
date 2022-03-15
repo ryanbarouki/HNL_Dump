@@ -67,19 +67,18 @@ class SignalProcessor:
 
     def __apply_BEBC_cuts(self, hnl, channel) -> np.ndarray:
         cut_signal = []
-        total_signal = 0
+        total_signal = len(hnl.signal[channel])
         if not hnl.signal:
             raise Exception("No signal object!")
         if channel == "e+e-v":
             e_min = 0.8 #GeV
             mT_max = 1.85 #GeV
-            total_signal += len(hnl.signal[channel])
-            for signal in hnl.signal[channel]:
-                energy = signal.momentum.get_energy()
-                transverse_mass = signal.momentum.get_transverse_mass()
+            for momentum in hnl.signal[channel]:
+                energy = momentum.get_energy()
+                transverse_mass = momentum.get_transverse_mass()
                 if energy > e_min and transverse_mass < mT_max:
-                    cut_signal.append(signal)
-            Logger().log(f"Efficiency: {len(cut_signal)/len(hnl.signal[channel])}")
+                    cut_signal.append(momentum)
+            Logger().log(f"Efficiency: {len(cut_signal)/total_signal}")
         else:
             raise Exception("Invalid channel or channel not implemented")
         return len(cut_signal) / total_signal, cut_signal
