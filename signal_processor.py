@@ -18,11 +18,14 @@ class SignalProcessor:
     def get_upper_bound(self):
         hnls = self.beam.find_instances_of_type(HNL)
         # TODO this channel string is everywhere - separately defined!
-        channel = "e+e-v"
+        channels = ["e+e-v"]#, "mu+e+nu"]
         if len(hnls) == 0:
             raise Exception("No HNLs!")
 
-        total_decays, cut_signal = self.get_total_decays(hnls, channel)
+        total_decays = 0
+        for channel in channels:
+            total_decays_from_channel, cut_signal = self.get_total_decays(hnls, channel)
+            total_decays += total_decays_from_channel
 
         upper_bound_squared = np.sqrt(OBSERVED_EVENTS/total_decays)
         return upper_bound_squared, cut_signal
@@ -31,8 +34,8 @@ class SignalProcessor:
         logger = Logger()
         total_decays = 0
         for hnl in hnls:
-            efficiency, cut_signal = self.__apply_BEBC_cuts(hnl, channel=channel)
-            prop_factor = hnl.average_propagation_factor
+            efficiency, cut_signal = self.__apply_BEBC_cuts(hnl, channel=channel, mixing_type=hnl.mixing_type)
+            prop_factor = hnl.average_propagation_factor[channel]
             acceptance = hnl.acceptance
             total_flux = 0
             logger.log(f"Propagation factor: {prop_factor}")
@@ -65,22 +68,27 @@ class SignalProcessor:
         print(f"Total decays: {total_decays}")
         return total_decays < OBSERVED_EVENTS
 
-    def __apply_BEBC_cuts(self, hnl, channel) -> np.ndarray:
+    def __apply_BEBC_cuts(self, hnl, channel, mixing_type) -> np.ndarray:
         cut_signal = []
         total_signal = len(hnl.signal[channel])
         if not hnl.signal:
             raise Exception("No signal object!")
-        if channel == "e+e-v":
+        
+        e_min = 0
+        mT_max = 0
+        if mixing_type == MixingType.electron:
             e_min = 0.8 #GeV
             mT_max = 1.85 #GeV
-            for momentum in hnl.signal[channel]:
-                energy = momentum.get_energy()
-                transverse_mass = momentum.get_transverse_mass()
-                if energy > e_min and transverse_mass < mT_max:
-                    cut_signal.append(momentum)
-            Logger().log(f"Efficiency: {len(cut_signal)/total_signal}")
-        else:
-            raise Exception("Invalid channel or channel not implemented")
+        elif mixing_type == MixingType.tau:
+            e_min = 0.8 #GeV
+            mT_max = 0.19 #GeV
+        # TODO what should the energy cut be for the HNL -> e mu nu channel?
+        for momentum in hnl.signal[channel]:
+            energy = momentum.get_energy()
+            transverse_mass = momentum.get_transverse_mass()
+            if energy > e_min and transverse_mass < mT_max:
+                cut_signal.append(momentum)
+        Logger().log(f"Efficiency: {len(cut_signal)/total_signal}")
         return len(cut_signal) / total_signal, cut_signal
 
     def __get_normalised_hnl_flux_from_DpDm_mesons(self, hnl_mass):

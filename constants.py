@@ -3,5 +3,7 @@ import numpy as np
 DETECTOR_OPENING_ANGLE = 2.52/404
 DETECTOR_LENGTH = 1.85 * 5.08e15 # GeV^-1
 DETECTOR_DISTANCE = 404 * 5.08e15 # GeV^-1
+
 SIN_WEINB = np.sqrt(0.22290)
 GF = 1.166e-5 # GeV-2
+F_PI = 130e-3 # GeV
