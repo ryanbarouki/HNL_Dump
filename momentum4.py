@@ -33,6 +33,13 @@ class Momentum4:
         p = np.array([self.p[0], -self.p[1], -self.p[2], -self.p[3]])
         return Momentum4(p, self.m)
     
+    def __add__(self, other):
+        p1 = np.array(self.p)
+        p2 = np.array(other.p)
+        p = p1 + p2
+        m = np.sqrt(p[0]**2 - p[1]**2 - p[2]**2 - p[3]**2) # invariant mass
+        return Momentum4(p, m)
+    
     def get_energy(self):
         return self.p[0]
     

@@ -34,7 +34,7 @@ class SignalProcessor:
         logger = Logger()
         total_decays = 0
         for hnl in hnls:
-            efficiency, cut_signal = self.__apply_BEBC_cuts(hnl, channel=channel, mixing_type=hnl.mixing_type)
+            efficiency = hnl.efficiency[channel]
             prop_factor = hnl.average_propagation_factor[channel]
             acceptance = hnl.acceptance
             total_flux = 0
@@ -58,7 +58,7 @@ class SignalProcessor:
                     logger.log("Flux norm (Ds): {:e}".format(total_flux))
 
             total_decays += total_flux*prop_factor*efficiency*acceptance
-        return total_decays, cut_signal
+        return total_decays, []
 
     def total_decays_less_than_observed(self):
         hnls = self.beam.find_instances_of_type(HNL)
