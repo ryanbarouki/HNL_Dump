@@ -120,11 +120,8 @@ class HNL(Particle):
     def decay(self, num_samples, mixing_type: MixingType):
         self.acceptance = self.geometric_cut(0, self.beam.max_opening_angle)
         DEBUG_AVERAGE_MOMENTUM(self, "Average HNL momentum after angle cut")
-        if mixing_type == MixingType.electron:
-            for channel in self.beam.channels:
-                self.decay_funcs[channel](channel, num_samples, mixing_type)
-        elif mixing_type == MixingType.tau:
-            self.decay_to_e_pair(num_samples, mixing_type)
+        for channel in self.beam.channels:
+            self.decay_funcs[channel](channel, num_samples, mixing_type)
         return self
 
     def decay_to_e_pi(self, channel, num_samples, mixing_type):

@@ -24,7 +24,7 @@ class BeamExperiment:
         if mixing_type == MixingType.electron:
             self.channels = ELECTRON_HNL_CHANNELS
         elif mixing_type == MixingType.tau:
-            pass
+            self.channels = TAU_HNL_CHANNELS
     
     def with_mixing(self, mixing_squared):
         self.linear_regime = False
