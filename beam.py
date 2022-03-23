@@ -1,5 +1,5 @@
 import numpy as np
-from constants import ELECTRON_HNL_CHANNELS
+from constants import *
 from momentum4 import Momentum4
 from particles.DsMeson import DsMeson
 from particles.DMeson import DMeson
@@ -8,15 +8,15 @@ from utils import generate_samples, e_cos_theta_to_momentum4
 from mixing_type import MixingType
 from logger import Logger
 class BeamExperiment:
-    def __init__(self, beam_energy, nucleon_mass, max_opening_angle, detector_length, detector_distance, mixing_type):
-        self.s = nucleon_mass*(2*beam_energy + nucleon_mass)
-        self.beam_momentum = Momentum4.from_polar(beam_energy + nucleon_mass, 1, 0, np.sqrt(self.s))
-        self.beta_cm = beam_energy/(beam_energy + nucleon_mass)
-        self.gamma_cm = (beam_energy + nucleon_mass)/np.sqrt(self.s)
+    def __init__(self, mixing_type):
+        self.s = NUCLEON_MASS*(2*BEAM_ENERGY + NUCLEON_MASS)
+        self.beam_momentum = Momentum4.from_polar(BEAM_ENERGY + NUCLEON_MASS, 1, 0, np.sqrt(self.s))
+        self.beta_cm = BEAM_ENERGY/(BEAM_ENERGY + NUCLEON_MASS)
+        self.gamma_cm = (BEAM_ENERGY + NUCLEON_MASS)/np.sqrt(self.s)
         self.children = []
-        self.MAX_OPENING_ANGLE = max_opening_angle
-        self.DETECTOR_LENGTH = detector_length
-        self.DETECTOR_DISTANCE = detector_distance
+        self.max_opening_angle = DETECTOR_OPENING_ANGLE
+        self.detector_length = DETECTOR_LENGTH
+        self.detector_distance = DETECTOR_DISTANCE
         self.linear_regime = True
         self.mixing_squared = 1
         #TODO everything should just use this mixing type

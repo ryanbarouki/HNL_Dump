@@ -8,7 +8,7 @@ from particles.DsMeson import DsMeson
 import branching_ratios as BR
 import cross_sections as CS
 from logger import Logger
-from constants import *
+from constants import OBSERVED_EVENTS, ELECTRON_NU_MASSLESS_FLUX
 
 class SignalProcessor:
     def __init__(self, beam) -> None:

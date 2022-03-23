@@ -1,15 +1,13 @@
 #!/usr/local/bin/python3
 import argparse
+import numpy as np
 from beam import BeamExperiment
 from mixing_type import MixingType
-from constants import *
 from signal_processor import SignalProcessor
 from logger import Logger
 
 def total_decays_less_than_observed(hnl_mass, mixing_squared, num_samples, mixing_type):
-    beam = BeamExperiment(beam_energy=400, nucleon_mass=1., \
-        max_opening_angle=DETECTOR_OPENING_ANGLE, detector_length=DETECTOR_LENGTH, \
-        detector_distance=DETECTOR_DISTANCE).with_mixing(mixing_squared)
+    beam = BeamExperiment(mixing_type).with_mixing(mixing_squared)
 
     beam.start_dump(hnl_mass, num_samples=num_samples, mixing_type=mixing_type)
     total_decays_less_than_observed = SignalProcessor(beam).total_decays_less_than_observed()
