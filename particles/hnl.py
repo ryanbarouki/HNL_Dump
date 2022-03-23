@@ -85,7 +85,6 @@ class HNL(Particle):
             return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*c1
 
     def __partial_decay_rate_to_electron_muon(self, mixing_type, decay_type=DecayType.CCNC):
-        #TODO implement
         if mixing_type == MixingType.electron:
             # https://arxiv.org/abs/hep-ph/9703333
             xm = MUON_MASS/self.m
@@ -141,26 +140,40 @@ class HNL(Particle):
         return self
 
     def decay_to_e_pi(self, channel, num_samples, mixing_type):
-        #TODO implement
         partial_decay = self.__partial_decay_rate_to_electron_pi(mixing_type)
-        Logger().log(f"e+pi partial width {partial_decay}")
+        Logger().log(f"{channel} partial width {partial_decay}")
         self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(mixing_type, partial_decay)
 
         electron = Electron()
         pion = Pion()
         electron_rest_momenta = get_two_body_momenta(self, electron, pion, num_samples)
         electron.set_momenta(electron_rest_momenta).boost(self.momenta)
-        # TODO apply cuts to the electron
+        pion_rest_momenta = get_two_body_momenta(self, pion, electron, num_samples)
+        pion.set_momenta(pion_rest_momenta).boost(self.momenta)
+
+        signal = list(zip(electron.momenta, pion.momenta))
+
+        # Apply cuts
+        cut_signal = []
+        mT_max = 1.85 #GeV
+        elec_e_min = 0.8 #GeV
+        for elec_p, pion_p in signal:
+            p_tot = elec_p + pion_p
+            if elec_p.get_energy() > elec_e_min and p_tot.get_transverse_mass() < mT_max:
+                cut_signal.append([elec_p, pion_p])
+        
+        self.efficiency[channel] = len(cut_signal)/len(signal)
+        Logger().log(f"{channel} channel efficiency: {self.efficiency[channel]}")
 
     def decay_to_e_mu(self, channel, num_samples, mixing_type):
         decay_type = DecayType.CCNC
 
         partial_decay = self.__partial_decay_rate_to_electron_muon(mixing_type, decay_type=decay_type)
-        Logger().log(f"Partial width: {partial_decay}")
+        Logger().log(f"{channel} partial width: {partial_decay}")
         self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(mixing_type, partial_decay)
         
         e_elec = np.linspace(0, self.m/2, 1000)
-        e_muon = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000)
+        e_muon = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000, endpoint=False)
         lepton_energy_samples = generate_samples(e_elec, e_muon, \
             dist_func=self.__electron_muon_dist, n_samples=num_samples, \
             region=lambda e_elec, e_muon: e_elec + e_muon > self.m/2)
@@ -186,14 +199,14 @@ class HNL(Particle):
                 signal.append([p_elec, p_muon, p_tot]) 
 
         self.efficiency[channel] = len(signal)/total_signal_length
-        Logger().log(f"e+e-v channel efficiency: {self.efficiency[channel]}")
+        Logger().log(f"{channel} channel efficiency: {self.efficiency[channel]}")
 
     def decay_to_e_pair(self, channel, num_samples, mixing_type):
         # Decay Ne/tau -> e+ e- nu_e/tau
         decay_type = DecayType.CCNC
 
         partial_decay = self.__partial_decay_rate_to_electron_pair(mixing_type, decay_type=decay_type)
-        Logger().log(f"e pair partial width: {partial_decay}")
+        Logger().log(f"{channel} partial width: {partial_decay}")
         self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(mixing_type, partial_decay)
         
         e_l_plus = np.linspace(0, self.m/2, 1000)
@@ -221,7 +234,7 @@ class HNL(Particle):
                 signal.append([p1, p2, p_tot]) 
 
         self.efficiency[channel] = len(signal)/total_signal_length
-        Logger().log(f"e+e-v channel efficiency: {self.efficiency[channel]}")
+        Logger().log(f"{channel} channel efficiency: {self.efficiency[channel]}")
     
     def __get_lepton_momenta_lab_frame(self, lepton_energies, hnl_momentum, lepton1, lepton2):
             e1, e2 = lepton_energies
