@@ -1,6 +1,7 @@
 
 import numpy as np
 from particles.electron import Electron
+from particles.muon import Muon
 from particles.pion import Pion
 from particle_masses import *
 from momentum4 import Momentum4
@@ -19,6 +20,11 @@ class HNL(Particle):
         self.signal = {}
         self.average_propagation_factor = {}
         self.efficiency = {}
+        self.decay_funcs = {
+            "e+pos+nu": self.decay_to_e_pair,
+            "mu+e+nu": self.decay_to_e_mu,
+            "e+pi": self.decay_to_e_pi
+        }
 
 
     def __get_lepton_pair_lab_frame(self, lepton_samples: np.ndarray) -> Particle:
@@ -117,65 +123,78 @@ class HNL(Particle):
             # TODO double check this 
             return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(2*c1)
 
-    def __get_prop_factor_for_regime(self, mixing_type, channel, partial_decay):
+    def __get_prop_factor_for_regime(self, mixing_type, partial_decay):
         if self.beam.linear_regime:
-            self.average_propagation_factor[channel] = self.__average_propagation_factor(self.beam.DETECTOR_LENGTH, partial_decay)
+            return self.__average_propagation_factor(self.beam.DETECTOR_LENGTH, partial_decay)
         else:
             total_decay = self.__total_decay_rate(mixing_type)
-            self.average_propagation_factor[channel] = self.__avg_non_linear_propagation_factor(self.beam.DETECTOR_LENGTH, self.beam.DETECTOR_DISTANCE, partial_decay, total_decay)
+            return self.__avg_non_linear_propagation_factor(self.beam.DETECTOR_LENGTH, self.beam.DETECTOR_DISTANCE, partial_decay, total_decay)
 
     def decay(self, num_samples, mixing_type: MixingType):
         self.acceptance = self.geometric_cut(0, self.beam.MAX_OPENING_ANGLE)
         DEBUG_AVERAGE_MOMENTUM(self, "Average HNL momentum after angle cut")
         if mixing_type == MixingType.electron:
-            self.decay_to_e_pair(num_samples, mixing_type)
-            self.decay_to_e_mu(num_samples, mixing_type)
-            self.decay_to_e_pi(num_samples, mixing_type)
+            for channel in self.beam.channels:
+                self.decay_funcs[channel](channel, num_samples, mixing_type)
         elif mixing_type == MixingType.tau:
             self.decay_to_e_pair(num_samples, mixing_type)
         return self
 
-    def decay_to_e_pi(self, num_samples, mixing_type):
+    def decay_to_e_pi(self, channel, num_samples, mixing_type):
         #TODO implement
-        channel = "e+pi"
-
         partial_decay = self.__partial_decay_rate_to_electron_pi(mixing_type)
         Logger().log(f"e+pi partial width {partial_decay}")
-        self.__get_prop_factor_for_regime(mixing_type, channel, partial_decay)
+        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(mixing_type, partial_decay)
 
         electron = Electron()
         pion = Pion()
         electron_rest_momenta = get_two_body_momenta(self, electron, pion, num_samples)
         electron.set_momenta(electron_rest_momenta).boost(self.momenta)
+        # TODO apply cuts to the electron
 
-        # TODO carry on and figure out how the cuts will be applied, maybe just to the electron???
-
-    def decay_to_e_mu(self, num_samples, mixing_type):
-        channel = "mu+e+nu"
+    def decay_to_e_mu(self, channel, num_samples, mixing_type):
         decay_type = DecayType.CCNC
 
         partial_decay = self.__partial_decay_rate_to_electron_muon(mixing_type, decay_type=decay_type)
         Logger().log(f"Partial width: {partial_decay}")
-        self.__get_prop_factor_for_regime(mixing_type, channel, partial_decay)
+        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(mixing_type, partial_decay)
         
         e_elec = np.linspace(0, self.m/2, 1000)
         e_muon = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000)
         lepton_energy_samples = generate_samples(e_elec, e_muon, \
             dist_func=self.__electron_muon_dist, n_samples=num_samples, \
-            region=lambda ep, em: ep + em > self.m/2)
+            region=lambda e_elec, e_muon: e_elec + e_muon > self.m/2)
         
-        lepton_pair = self.__get_lepton_pair_lab_frame(lepton_energy_samples)
+        elec = Electron()
+        muon = Muon()
+        signal = []
+        total_signal_length = min(len(self.momenta), len(lepton_energy_samples))
+        # experimental cuts for electron pair
+        elec_e_min = 0.8 #GeV
+        muon_e_min = 3. #GeV
+        mT_max = 1.85 #GeV
+        for i in range(total_signal_length):
+            momenta = self.__get_lepton_momenta_lab_frame(lepton_energy_samples[i], self.momenta[i], elec, muon)
+            if momenta:
+                p_elec, p_muon, p_tot = momenta
+            else:
+                continue
 
-        self.signal[channel] = lepton_pair.momenta
+            # apply cuts here
+            if p_elec.get_energy() > elec_e_min and p_muon.get_energy() > muon_e_min and p_tot.get_transverse_mass() < mT_max:
+                # NOTE we only need this signal if we want to plot
+                signal.append([p_elec, p_muon, p_tot]) 
 
-    def decay_to_e_pair(self, num_samples, mixing_type):
+        self.efficiency[channel] = len(signal)/total_signal_length
+        Logger().log(f"e+e-v channel efficiency: {self.efficiency[channel]}")
+
+    def decay_to_e_pair(self, channel, num_samples, mixing_type):
         # Decay Ne/tau -> e+ e- nu_e/tau
-        channel = "e+e-v"
         decay_type = DecayType.CCNC
 
         partial_decay = self.__partial_decay_rate_to_electron_pair(mixing_type, decay_type=decay_type)
         Logger().log(f"e pair partial width: {partial_decay}")
-        self.__get_prop_factor_for_regime(mixing_type, channel, partial_decay)
+        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(mixing_type, partial_decay)
         
         e_l_plus = np.linspace(0, self.m/2, 1000)
         e_l_minus = np.linspace(0, self.m/2, 1000)
@@ -186,36 +205,41 @@ class HNL(Particle):
         elec2 = Electron()
         signal = []
         total_signal_length = min(len(self.momenta), len(lepton_energy_samples))
+        # experimental cuts for electron pair
+        e_min = 0.8 #GeV
+        mT_max = 1.85 #GeV
         for i in range(total_signal_length):
-            e1, e2 = lepton_energy_samples[i]
+            momenta = self.__get_lepton_momenta_lab_frame(lepton_energy_samples[i], self.momenta[i], elec1, elec2)
+            if momenta:
+                p1, p2, p_tot = momenta
+            else:
+                continue
+
+            # apply cuts here
+            if p1.get_energy() > e_min and p2.get_energy() > e_min and p_tot.get_transverse_mass() < mT_max:
+                # NOTE we only need this signal if we want to plot
+                signal.append([p1, p2, p_tot]) 
+
+        self.efficiency[channel] = len(signal)/total_signal_length
+        Logger().log(f"e+e-v channel efficiency: {self.efficiency[channel]}")
+    
+    def __get_lepton_momenta_lab_frame(self, lepton_energies, hnl_momentum, lepton1, lepton2):
+            e1, e2 = lepton_energies
             e3 = self.m - (e1 + e2)
-            p1 = np.sqrt(e1**2 - elec1.m**2)
-            p2 = np.sqrt(e2**2 - elec2.m**2)
-            cos_th_12 = (elec1.m**2 + elec2.m**2 + 2*e1*e2 - self.m**2 + 2*self.m*e3)/(2*p1*p2)
+            p1 = np.sqrt(e1**2 - lepton1.m**2)
+            p2 = np.sqrt(e2**2 - lepton2.m**2)
+            cos_th_12 = (lepton1.m**2 + lepton2.m**2 + 2*e1*e2 - self.m**2 + 2*self.m*e3)/(2*p1*p2)
             if abs(cos_th_12) > 1:
                 Logger().log(f"invalid cos: {cos_th_12}")
-                continue
-            theta_12 = np.arccos(cos_th_12)
+                return None
+            theta_12 = np.arccos(cos_th_12) # takes values between 0, pi
             theta_1 = np.random.uniform(0, 2*np.pi) # angle of one of the leptons uniformly between 0, 2pi. This is like the cone angle
             theta_2 = theta_1 + theta_12
             cos_theta_1 = np.cos(theta_1)
             cos_theta_2 = np.cos(theta_2)
-            p1 = Momentum4.from_polar(e1, cos_theta_1, 0, elec1.m).boost(self.momenta[i])
-            p2 = Momentum4.from_polar(e2, cos_theta_2, 0, elec2.m).boost(self.momenta[i])
+            p1 = Momentum4.from_polar(e1, cos_theta_1, 0, lepton1.m).boost(hnl_momentum)
+            p2 = Momentum4.from_polar(e2, cos_theta_2, 0, lepton2.m).boost(hnl_momentum)
             p_tot = p1 + p2
-            # apply cuts here
-            e_min = 0.8 #GeV
-            mT_max = 1.85 #GeV
-            if p1.get_energy() > e_min and p2.get_energy() > e_min and p_tot.get_transverse_mass() < mT_max:
-                signal.append([p1, p2, p_tot]) 
-            # if p_tot.get_energy() > e_min and p_tot.get_transverse_mass() < mT_max:
-            #     signal.append([p1, p2, p_tot]) 
-
-        # lepton_pair = self.__get_lepton_pair_lab_frame(lepton_energy_samples)
-
-        self.efficiency[channel] = len(signal)/total_signal_length
-        Logger().log(f"e+e-v channel efficiency: {self.efficiency[channel]}")
-        # self.signal[channel] = lepton_pair.momenta
-    
+            return p1,p2,p_tot
     def __apply_cuts(self):
         pass

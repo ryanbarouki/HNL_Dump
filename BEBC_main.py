@@ -15,7 +15,7 @@ def main():
 
     beam = BeamExperiment(beam_energy=400, nucleon_mass=1., \
         max_opening_angle=DETECTOR_OPENING_ANGLE, detector_length=DETECTOR_LENGTH, \
-        detector_distance=DETECTOR_DISTANCE)
+        detector_distance=DETECTOR_DISTANCE, mixing_type=mixing_type)
 
     beam.start_dump(hnl_mass, num_samples=num_samples, mixing_type=mixing_type)
     upper_bound_squared, cut_signal = SignalProcessor(beam).get_upper_bound()
