@@ -27,6 +27,7 @@ class HNL(Particle):
         self.decay_funcs = {
             "e+pos+nu": self.decay_to_e_pair,
             "mu+e+nu": self.decay_to_e_mu,
+            "mu+mu+nu": self.decay_to_mu_pair,
             "e+pi": self.decay_to_e_pi
         }
 
@@ -58,6 +59,11 @@ class HNL(Particle):
         x_mu = 2*e_muon/self.m
         return x_mu*(1 - x_mu + xm**2)
 
+    def __muon_pair_dist(self, e_plus, e_minus):
+        #TODO find and implement
+        # https://arxiv.org/abs/hep-ph/9703333 not sure if the one there is correct for electrons and tau
+        pass
+
     def __partial_decay_rate_to_electron_pair(self, decay_type=DecayType.CCNC):
         c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         c2 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
@@ -72,6 +78,11 @@ class HNL(Particle):
         elif self.beam.mixing_type == MixingType.tau:
             # N_tau -> e+ e- nu_tau
             return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*c1
+    
+    def __partial_decay_rate_to_muon_pair(self):
+        # Boiarska et al
+        c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
+        return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*c1
 
     def __partial_decay_rate_to_electron_muon(self):
         if self.beam.mixing_type == MixingType.electron:
@@ -220,21 +231,54 @@ class HNL(Particle):
         self.efficiency[channel_code] = len(signal)/total_signal_length
         Logger().log(f"{channel_code} channel efficiency: {self.efficiency[channel_code]}")
     
+    def decay_to_mu_pair(self, channel_code):
+        partial_decay = self.__partial_decay_rate_to_muon_pair()
+        Logger().log(f"{channel_code} partial width: {partial_decay}")
+        self.average_propagation_factor[channel_code] = self.__get_prop_factor_for_regime(partial_decay)
+
+        mu_plus = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000, endpoint=False)
+        mu_minus = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000, endpoint=False)
+        lepton_energy_samples = generate_samples(mu_plus, mu_minus, \
+            dist_func=lambda mu_p, mu_m: self.__muon_pair_dist(mu_p, mu_m), n_samples=self.beam.num_samples, \
+            region=lambda mu_p, mu_m: allowed_e1_e2_three_body_decays(mu_p, mu_m, e_parent=self.m, m1=MUON_MASS, m2=MUON_MASS, m3=NEUTRINO_MASS))
+        
+        muon1 = Muon()
+        muon2 = Muon()
+        signal = []
+        total_signal_length = min(len(self.momenta), len(lepton_energy_samples))
+        # experimental cuts for electron pair
+        muon_e_min = 3. #GeV
+        mT_max = 1.85 #GeV
+        for i in range(total_signal_length):
+            momenta = self.__get_lepton_momenta_lab_frame(lepton_energy_samples[i], self.momenta[i], muon1, muon2)
+            if momenta:
+                p1, p2, p_tot = momenta
+            else:
+                continue
+
+            # apply cuts here
+            if p1.get_energy() > muon_e_min and p2.get_energy() > muon_e_min and p_tot.get_transverse_mass() < mT_max:
+                # NOTE we only need this signal if we want to plot
+                signal.append([p1, p2, p_tot]) 
+
+        self.efficiency[channel_code] = len(signal)/total_signal_length
+        Logger().log(f"{channel_code} channel efficiency: {self.efficiency[channel_code]}")
+    
     def __get_lepton_momenta_lab_frame(self, lepton_energies, hnl_momentum, lepton1, lepton2):
-            e1, e2 = lepton_energies
-            e3 = self.m - (e1 + e2)
-            p1 = np.sqrt(e1**2 - lepton1.m**2)
-            p2 = np.sqrt(e2**2 - lepton2.m**2)
-            cos_th_12 = (lepton1.m**2 + lepton2.m**2 + 2*e1*e2 - self.m**2 + 2*self.m*e3)/(2*p1*p2)
-            if abs(cos_th_12) > 1:
-                Logger().log(f"invalid cos: {cos_th_12}")
-                return None
-            theta_12 = np.arccos(cos_th_12) # takes values between 0, pi
-            theta_1 = np.random.uniform(0, 2*np.pi) # angle of one of the leptons uniformly between 0, 2pi. This is like the cone angle
-            theta_2 = theta_1 + theta_12
-            cos_theta_1 = np.cos(theta_1)
-            cos_theta_2 = np.cos(theta_2)
-            p1 = Momentum4.from_polar(e1, cos_theta_1, 0, lepton1.m).boost(hnl_momentum)
-            p2 = Momentum4.from_polar(e2, cos_theta_2, 0, lepton2.m).boost(hnl_momentum)
-            p_tot = p1 + p2
-            return p1,p2,p_tot
+        e1, e2 = lepton_energies
+        e3 = self.m - (e1 + e2)
+        p1 = np.sqrt(e1**2 - lepton1.m**2)
+        p2 = np.sqrt(e2**2 - lepton2.m**2)
+        cos_th_12 = (lepton1.m**2 + lepton2.m**2 + 2*e1*e2 - self.m**2 + 2*self.m*e3)/(2*p1*p2)
+        if abs(cos_th_12) > 1:
+            Logger().log(f"invalid cos: {cos_th_12}")
+            return None
+        theta_12 = np.arccos(cos_th_12) # takes values between 0, pi
+        theta_1 = np.random.uniform(0, 2*np.pi) # angle of one of the leptons uniformly between 0, 2pi. This is like the cone angle
+        theta_2 = theta_1 + theta_12
+        cos_theta_1 = np.cos(theta_1)
+        cos_theta_2 = np.cos(theta_2)
+        p1 = Momentum4.from_polar(e1, cos_theta_1, 0, lepton1.m).boost(hnl_momentum)
+        p2 = Momentum4.from_polar(e2, cos_theta_2, 0, lepton2.m).boost(hnl_momentum)
+        p_tot = p1 + p2
+        return p1,p2,p_tot
