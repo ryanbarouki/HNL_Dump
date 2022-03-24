@@ -22,6 +22,8 @@ class HNL(Particle):
         self.signal = {}
         self.average_propagation_factor = {}
         self.efficiency = {}
+
+        # NOTE add more HNL decay channels here
         self.decay_funcs = {
             "e+pos+nu": self.decay_to_e_pair,
             "mu+e+nu": self.decay_to_e_mu,
@@ -119,14 +121,14 @@ class HNL(Particle):
     def decay(self):
         self.acceptance = self.geometric_cut(0, self.beam.max_opening_angle)
         DEBUG_AVERAGE_MOMENTUM(self, "Average HNL momentum after angle cut")
-        for channel in self.beam.channels:
-            self.decay_funcs[channel](channel)
+        for channel_code in self.beam.channels:
+            self.decay_funcs[channel_code](channel_code)
         return self
 
-    def decay_to_e_pi(self, channel):
+    def decay_to_e_pi(self, channel_code):
         partial_decay = self.__partial_decay_rate_to_electron_pi()
-        Logger().log(f"{channel} partial width {partial_decay}")
-        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(partial_decay)
+        Logger().log(f"{channel_code} partial width {partial_decay}")
+        self.average_propagation_factor[channel_code] = self.__get_prop_factor_for_regime(partial_decay)
 
         electron = Electron()
         pion = Pion()
@@ -146,13 +148,13 @@ class HNL(Particle):
             if elec_p.get_energy() > elec_e_min and p_tot.get_transverse_mass() < mT_max:
                 cut_signal.append([elec_p, pion_p])
         
-        self.efficiency[channel] = len(cut_signal)/len(signal)
-        Logger().log(f"{channel} channel efficiency: {self.efficiency[channel]}")
+        self.efficiency[channel_code] = len(cut_signal)/len(signal)
+        Logger().log(f"{channel_code} channel efficiency: {self.efficiency[channel_code]}")
 
-    def decay_to_e_mu(self, channel):
+    def decay_to_e_mu(self, channel_code):
         partial_decay = self.__partial_decay_rate_to_electron_muon()
-        Logger().log(f"{channel} partial width: {partial_decay}")
-        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(partial_decay)
+        Logger().log(f"{channel_code} partial width: {partial_decay}")
+        self.average_propagation_factor[channel_code] = self.__get_prop_factor_for_regime(partial_decay)
         
         e_elec = np.linspace(0, self.m/2, 1000, endpoint=False)
         e_muon = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000, endpoint=False)
@@ -183,14 +185,14 @@ class HNL(Particle):
                 signal.append([p_elec, p_muon, p_tot]) 
 
         Logger().log(f"Invalid cos count: {count_invalids}")
-        self.efficiency[channel] = len(signal)/total_signal_length
-        Logger().log(f"{channel} channel efficiency: {self.efficiency[channel]}")
+        self.efficiency[channel_code] = len(signal)/total_signal_length
+        Logger().log(f"{channel_code} channel efficiency: {self.efficiency[channel_code]}")
 
-    def decay_to_e_pair(self, channel):
+    def decay_to_e_pair(self, channel_code):
         # Decay Ne/tau -> e+ e- nu_e/tau
         partial_decay = self.__partial_decay_rate_to_electron_pair(decay_type=DECAY_TYPE)
-        Logger().log(f"{channel} partial width: {partial_decay}")
-        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(partial_decay)
+        Logger().log(f"{channel_code} partial width: {partial_decay}")
+        self.average_propagation_factor[channel_code] = self.__get_prop_factor_for_regime(partial_decay)
         
         e_l_plus = np.linspace(0, self.m/2, 1000)
         e_l_minus = np.linspace(0, self.m/2, 1000)
@@ -217,8 +219,8 @@ class HNL(Particle):
                 # NOTE we only need this signal if we want to plot
                 signal.append([p1, p2, p_tot]) 
 
-        self.efficiency[channel] = len(signal)/total_signal_length
-        Logger().log(f"{channel} channel efficiency: {self.efficiency[channel]}")
+        self.efficiency[channel_code] = len(signal)/total_signal_length
+        Logger().log(f"{channel_code} channel efficiency: {self.efficiency[channel_code]}")
     
     def __get_lepton_momenta_lab_frame(self, lepton_energies, hnl_momentum, lepton1, lepton2):
             e1, e2 = lepton_energies
