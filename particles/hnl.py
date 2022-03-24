@@ -105,7 +105,7 @@ class HNL(Particle):
         c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         c2 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         if mixing_type == MixingType.electron:
-            return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(c1 + c2 + 1)
+            return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(c1 + c2 + 1) + self.__partial_decay_rate_to_electron_pi(mixing_type)
         elif mixing_type == MixingType.tau:
             # TODO double check this 
             return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(2*c1)
@@ -155,7 +155,7 @@ class HNL(Particle):
         Logger().log(f"{channel} partial width: {partial_decay}")
         self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(mixing_type, partial_decay)
         
-        e_elec = np.linspace(0, self.m/2, 1000)
+        e_elec = np.linspace(0, self.m/2, 1000, endpoint=False)
         e_muon = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000, endpoint=False)
         lepton_energy_samples = generate_samples(e_elec, e_muon, \
             dist_func=self.__electron_muon_dist, n_samples=num_samples, \
@@ -169,11 +169,13 @@ class HNL(Particle):
         elec_e_min = 0.8 #GeV
         muon_e_min = 3. #GeV
         mT_max = 1.85 #GeV
+        count_invalids = 0
         for i in range(total_signal_length):
             momenta = self.__get_lepton_momenta_lab_frame(lepton_energy_samples[i], self.momenta[i], elec, muon)
             if momenta:
                 p_elec, p_muon, p_tot = momenta
             else:
+                count_invalids += 1
                 continue
 
             # apply cuts here
@@ -181,6 +183,7 @@ class HNL(Particle):
                 # NOTE we only need this signal if we want to plot
                 signal.append([p_elec, p_muon, p_tot]) 
 
+        Logger().log(f"Invalid cos count: {count_invalids}")
         self.efficiency[channel] = len(signal)/total_signal_length
         Logger().log(f"{channel} channel efficiency: {self.efficiency[channel]}")
 
@@ -224,7 +227,7 @@ class HNL(Particle):
             p2 = np.sqrt(e2**2 - lepton2.m**2)
             cos_th_12 = (lepton1.m**2 + lepton2.m**2 + 2*e1*e2 - self.m**2 + 2*self.m*e3)/(2*p1*p2)
             if abs(cos_th_12) > 1:
-                Logger().log(f"invalid cos: {cos_th_12}")
+                # Logger().log(f"invalid cos: {cos_th_12}")
                 return None
             theta_12 = np.arccos(cos_th_12) # takes values between 0, pi
             theta_1 = np.random.uniform(0, 2*np.pi) # angle of one of the leptons uniformly between 0, 2pi. This is like the cone angle
