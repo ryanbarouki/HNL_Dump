@@ -16,9 +16,8 @@ from logger import Logger
 # so this could be removed entirely and treated in full
 DECAY_TYPE = DecayType.CCNC
 class HNL(Particle):
-    def __init__(self, mass, mixing_type, beam=None, parent=None, momenta=[], decay_mode=None):
+    def __init__(self, mass, beam=None, parent=None, momenta=[], decay_mode=None):
         super().__init__(mass, beam, parent, momenta)
-        self.mixing_type = mixing_type
         self.decay_mode = decay_mode
         self.signal = {}
         self.average_propagation_factor = {}
@@ -57,10 +56,10 @@ class HNL(Particle):
         x_mu = 2*e_muon/self.m
         return x_mu*(1 - x_mu + xm**2)
 
-    def __partial_decay_rate_to_electron_pair(self, mixing_type, decay_type=DecayType.CCNC):
+    def __partial_decay_rate_to_electron_pair(self, decay_type=DecayType.CCNC):
         c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         c2 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
-        if mixing_type == MixingType.electron:
+        if self.beam.mixing_type == MixingType.electron:
             # Ne -> e+ e- nu_e
             if decay_type == DecayType.CC:
                 return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))
@@ -68,19 +67,19 @@ class HNL(Particle):
                 return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*c2
             else:
                 raise Exception("No value for only neutral current")
-        elif mixing_type == MixingType.tau:
+        elif self.beam.mixing_type == MixingType.tau:
             # N_tau -> e+ e- nu_tau
             return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*c1
 
-    def __partial_decay_rate_to_electron_muon(self, mixing_type, decay_type=DecayType.CCNC):
-        if mixing_type == MixingType.electron:
+    def __partial_decay_rate_to_electron_muon(self):
+        if self.beam.mixing_type == MixingType.electron:
             # https://arxiv.org/abs/hep-ph/9703333
             xm = MUON_MASS/self.m
             func_form = 1 - 8*xm**2 + 8*xm**6 + xm**8 - 12*xm**4*np.log(xm**2)
             return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3)*func_form)
 
-    def __partial_decay_rate_to_electron_pi(self, mixing_type):
-        if mixing_type == MixingType.electron:
+    def __partial_decay_rate_to_electron_pi(self):
+        if self.beam.mixing_type == MixingType.electron:
             phase_factor = 1 # TODO find this factor https://arxiv.org/pdf/1805.08567.pdf
             return self.beam.mixing_squared*(GF**2*self.m**3*F_PI**2/(16*np.pi))*phase_factor
 
@@ -101,39 +100,39 @@ class HNL(Particle):
             factors.append(factor)
         return np.average(factors)
 
-    def __total_decay_rate(self, mixing_type):
+    def __total_decay_rate(self):
         c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         c2 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
-        if mixing_type == MixingType.electron:
-            return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(c1 + c2 + 1) + self.__partial_decay_rate_to_electron_pi(mixing_type)
-        elif mixing_type == MixingType.tau:
+        if self.beam.mixing_type == MixingType.electron:
+            return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(c1 + c2 + 1) + self.__partial_decay_rate_to_electron_pi()
+        elif self.beam.mixing_type == MixingType.tau:
             # TODO double check this 
             return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(2*c1)
 
-    def __get_prop_factor_for_regime(self, mixing_type, partial_decay):
+    def __get_prop_factor_for_regime(self, partial_decay):
         if self.beam.linear_regime:
             return self.__average_propagation_factor(self.beam.detector_length, partial_decay)
         else:
-            total_decay = self.__total_decay_rate(mixing_type)
+            total_decay = self.__total_decay_rate()
             return self.__avg_non_linear_propagation_factor(self.beam.detector_length, self.beam.detector_distance, partial_decay, total_decay)
 
-    def decay(self, num_samples, mixing_type: MixingType):
+    def decay(self):
         self.acceptance = self.geometric_cut(0, self.beam.max_opening_angle)
         DEBUG_AVERAGE_MOMENTUM(self, "Average HNL momentum after angle cut")
         for channel in self.beam.channels:
-            self.decay_funcs[channel](channel, num_samples, mixing_type)
+            self.decay_funcs[channel](channel)
         return self
 
-    def decay_to_e_pi(self, channel, num_samples, mixing_type):
-        partial_decay = self.__partial_decay_rate_to_electron_pi(mixing_type)
+    def decay_to_e_pi(self, channel):
+        partial_decay = self.__partial_decay_rate_to_electron_pi()
         Logger().log(f"{channel} partial width {partial_decay}")
-        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(mixing_type, partial_decay)
+        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(partial_decay)
 
         electron = Electron()
         pion = Pion()
-        electron_rest_momenta = get_two_body_momenta(self, electron, pion, num_samples)
+        electron_rest_momenta = get_two_body_momenta(self, electron, pion, self.beam.num_samples)
         electron.set_momenta(electron_rest_momenta).boost(self.momenta)
-        pion_rest_momenta = get_two_body_momenta(self, pion, electron, num_samples)
+        pion_rest_momenta = get_two_body_momenta(self, pion, electron, self.beam.num_samples)
         pion.set_momenta(pion_rest_momenta).boost(self.momenta)
 
         signal = list(zip(electron.momenta, pion.momenta))
@@ -150,15 +149,15 @@ class HNL(Particle):
         self.efficiency[channel] = len(cut_signal)/len(signal)
         Logger().log(f"{channel} channel efficiency: {self.efficiency[channel]}")
 
-    def decay_to_e_mu(self, channel, num_samples, mixing_type):
-        partial_decay = self.__partial_decay_rate_to_electron_muon(mixing_type, decay_type=DECAY_TYPE)
+    def decay_to_e_mu(self, channel):
+        partial_decay = self.__partial_decay_rate_to_electron_muon()
         Logger().log(f"{channel} partial width: {partial_decay}")
-        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(mixing_type, partial_decay)
+        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(partial_decay)
         
         e_elec = np.linspace(0, self.m/2, 1000, endpoint=False)
         e_muon = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000, endpoint=False)
         lepton_energy_samples = generate_samples(e_elec, e_muon, \
-            dist_func=self.__electron_muon_dist, n_samples=num_samples, \
+            dist_func=self.__electron_muon_dist, n_samples=self.beam.num_samples, \
             region=lambda e_elec, e_muon: e_elec + e_muon > self.m/2)
         
         elec = Electron()
@@ -187,15 +186,16 @@ class HNL(Particle):
         self.efficiency[channel] = len(signal)/total_signal_length
         Logger().log(f"{channel} channel efficiency: {self.efficiency[channel]}")
 
-    def decay_to_e_pair(self, channel, num_samples, mixing_type):
+    def decay_to_e_pair(self, channel):
         # Decay Ne/tau -> e+ e- nu_e/tau
-        partial_decay = self.__partial_decay_rate_to_electron_pair(mixing_type, decay_type=DECAY_TYPE)
+        partial_decay = self.__partial_decay_rate_to_electron_pair(decay_type=DECAY_TYPE)
         Logger().log(f"{channel} partial width: {partial_decay}")
-        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(mixing_type, partial_decay)
+        self.average_propagation_factor[channel] = self.__get_prop_factor_for_regime(partial_decay)
         
         e_l_plus = np.linspace(0, self.m/2, 1000)
         e_l_minus = np.linspace(0, self.m/2, 1000)
-        lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, dist_func=lambda ep, em: self.__electron_positron_dist_dirac(ep, em, decay_type=DECAY_TYPE), n_samples=num_samples, \
+        lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, \
+            dist_func=lambda ep, em: self.__electron_positron_dist_dirac(ep, em, decay_type=DECAY_TYPE), n_samples=self.beam.num_samples, \
             region=lambda ep, em: ep + em > self.m/2)
         
         elec1 = Electron()

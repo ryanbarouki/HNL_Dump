@@ -8,7 +8,7 @@ from utils import generate_samples, e_cos_theta_to_momentum4
 from mixing_type import MixingType
 from logger import Logger
 class BeamExperiment:
-    def __init__(self, mixing_type):
+    def __init__(self, mixing_type, num_samples):
         self.s = NUCLEON_MASS*(2*BEAM_ENERGY + NUCLEON_MASS)
         self.beam_momentum = Momentum4.from_polar(BEAM_ENERGY + NUCLEON_MASS, 1, 0, np.sqrt(self.s))
         self.beta_cm = BEAM_ENERGY/(BEAM_ENERGY + NUCLEON_MASS)
@@ -21,6 +21,7 @@ class BeamExperiment:
         self.mixing_squared = 1
         #TODO everything should just use this mixing type
         self.mixing_type = mixing_type
+        self.num_samples = num_samples
         if mixing_type == MixingType.electron:
             self.channels = ELECTRON_HNL_CHANNELS
         elif mixing_type == MixingType.tau:
@@ -31,12 +32,12 @@ class BeamExperiment:
         self.mixing_squared = mixing_squared
         return self
 
-    def start_dump(self, hnl_mass, num_samples, mixing_type: MixingType):
-        if mixing_type == MixingType.electron:
-            self.__D_meson_channel(hnl_mass, num_samples, mixing_type)
-            self.__Ds_meson_channel(hnl_mass, num_samples, mixing_type)
-        elif mixing_type == MixingType.tau:
-            self.__Ds_meson_channel(hnl_mass, num_samples, mixing_type)
+    def start_dump(self, hnl_mass):
+        if self.mixing_type == MixingType.electron:
+            self.__D_meson_channel(hnl_mass)
+            self.__Ds_meson_channel(hnl_mass)
+        elif self.mixing_type == MixingType.tau:
+            self.__Ds_meson_channel(hnl_mass)
         return self
 
     def __meson_diff_distribution(self, pp, pt2):
@@ -45,11 +46,11 @@ class BeamExperiment:
         xf = 2*pp/np.sqrt(self.s)
         return np.exp(-b*pt2)*(1 - np.abs(xf))**n
 
-    def __get_meson_kinematics(self, mass, num_samples):
+    def __get_meson_kinematics(self, mass):
         sqrt_s = np.sqrt(self.s)
         pp = np.linspace(-sqrt_s/2, sqrt_s/2, 1000)
         pt2 = np.linspace(0, self.s/4, 10000)
-        samples = generate_samples(pp, pt2, dist_func=self.__meson_diff_distribution, n_samples=num_samples, region=lambda pp, pt2: pp**2 + pt2 < self.s/4 - mass**2)
+        samples = generate_samples(pp, pt2, dist_func=self.__meson_diff_distribution, n_samples=self.num_samples, region=lambda pp, pt2: pp**2 + pt2 < self.s/4 - mass**2)
 
         momentum4_samples = []
         momentum = 0
@@ -63,17 +64,17 @@ class BeamExperiment:
         Logger().log(f"Average meson momentum: {momentum/len(samples)}")
         return momentum4_samples
     
-    def __D_meson_channel(self, hnl_mass, num_samples, mixing_type):
-        momentum4_samples = self.__get_meson_kinematics(D_MASS, num_samples)
+    def __D_meson_channel(self, hnl_mass):
+        momentum4_samples = self.__get_meson_kinematics(D_MASS)
         D_meson = DMeson(beam=self, momenta=momentum4_samples)
         self.children.append(D_meson)
-        D_meson.decay(hnl_mass, num_samples, mixing_type)
+        D_meson.decay(hnl_mass)
     
-    def __Ds_meson_channel(self, hnl_mass, num_samples, mixing_type):
-        momentum4_samples = self.__get_meson_kinematics(DS_MASS, num_samples)
+    def __Ds_meson_channel(self, hnl_mass):
+        momentum4_samples = self.__get_meson_kinematics(DS_MASS)
         Ds_meson = DsMeson(beam=self, momenta=momentum4_samples)
         self.children.append(Ds_meson)
-        Ds_meson.decay(hnl_mass, num_samples, mixing_type)  
+        Ds_meson.decay(hnl_mass)  
     
     def find_instances_of_type(self, type, current=None, instances=None):
         if current == None:

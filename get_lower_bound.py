@@ -7,9 +7,9 @@ from signal_processor import SignalProcessor
 from logger import Logger
 
 def total_decays_less_than_observed(hnl_mass, mixing_squared, num_samples, mixing_type):
-    beam = BeamExperiment(mixing_type).with_mixing(mixing_squared)
+    beam = BeamExperiment(mixing_type=mixing_type, num_samples=num_samples).with_mixing(mixing_squared)
 
-    beam.start_dump(hnl_mass, num_samples=num_samples, mixing_type=mixing_type)
+    beam.start_dump(hnl_mass)
     total_decays_less_than_observed = SignalProcessor(beam).total_decays_less_than_observed()
 
     return total_decays_less_than_observed

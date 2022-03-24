@@ -12,9 +12,9 @@ def main():
 
     start = time.time()
 
-    beam = BeamExperiment(mixing_type=mixing_type)
+    beam = BeamExperiment(mixing_type=mixing_type, num_samples=num_samples)
 
-    beam.start_dump(hnl_mass, num_samples=num_samples, mixing_type=mixing_type)
+    beam.start_dump(hnl_mass)
     upper_bound_squared, cut_signal = SignalProcessor(beam).get_upper_bound()
     print(f"U squared: {upper_bound_squared}")
 

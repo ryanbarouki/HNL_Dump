@@ -38,14 +38,14 @@ class SignalProcessor:
             logger.log(f"Propagation factor: {prop_factor}")
             logger.log(f"Acceptance: {acceptance}")
 
-            if hnl.mixing_type == MixingType.electron:
+            if self.beam.mixing_type == MixingType.electron:
                 if isinstance(hnl.parent, DMeson):
                     total_flux = self.__get_normalised_hnl_flux_from_DpDm_mesons(hnl_mass=hnl.m)
                     logger.log("Flux norm (D): {:e}".format(total_flux))
                 elif isinstance(hnl.parent, DsMeson):
                     total_flux = self.__get_normalised_electron_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
                     logger.log("Flux norm (Ds): {:e}".format(total_flux))
-            elif hnl.mixing_type == MixingType.tau:
+            elif self.beam.mixing_type == MixingType.tau:
                 if isinstance(hnl.parent, Tau):
                     if hnl.decay_mode == TauDecayModes.hnl_pi:
                         total_flux = self.__get_normalised_hnl_flux_from_tau_two_body(hnl_mass=hnl.m)
