@@ -15,6 +15,7 @@ def total_decays_less_than_observed(hnl_mass, mixing_squared, num_samples, mixin
     return total_decays_less_than_observed
 
 def main():
+    # TODO make this stuff work again
     hnl_masses = np.linspace(0.2, 1.2, 10)
     mixings_squared = np.linspace(1e-3, 1e-2, 10)
 

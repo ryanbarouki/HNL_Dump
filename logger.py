@@ -10,6 +10,6 @@ class Logger(object):
             Logger.DEBUG = debug
         return cls._instance
 
-    def log(self, string):
-        if Logger.DEBUG:
+    def log(self, string, important=False):
+        if Logger.DEBUG or important:
             print(string)

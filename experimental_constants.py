@@ -1,3 +1,4 @@
+# TODO make sure all constants are accounted for here
 DETECTOR_OPENING_ANGLE = 2.52/404
 DETECTOR_LENGTH = 1.85 * 5.08e15 # GeV^-1
 DETECTOR_DISTANCE = 404 * 5.08e15 # GeV^-1

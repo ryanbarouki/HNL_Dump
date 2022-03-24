@@ -16,6 +16,13 @@ def DEBUG_PLOT_MOMENTA(particle, range):
     plt.hist2d(samples[:,0], samples[:,1], bins=100, range=range)
     plt.show()
 
+def allowed_e1_e2_three_body_decays(e1, e2, e_parent, m1, m2, m3):
+    x = e_parent**2 + m1**2 + m2**2 - m3**2
+    F = x**2 - 4*m1*m1*m2*m2 - 8*e_parent*(e2*e1**2 + e1*e2**2) \
+        + 4*(e_parent**2 + m2**2)*e1**2 + 4*(e_parent**2 + m1**2)*e2**2 + 4*(3*e_parent**2 + m1**2 + m2**2 - m3**2)*e1*e2 \
+        - 4*x*e_parent*e1 - 4*x*e_parent*e2
+    return F < 0
+    
 def DEBUG_AVERAGE_MOMENTUM(particle, text):
     total_p = 0
     for momentum in particle.momenta:

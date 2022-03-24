@@ -45,5 +45,5 @@ def parse_arguments():
     return hnl_mass,num_samples,plot,mixing_type
 
 if __name__ == "__main__":
-    logger = Logger(debug=True)
+    logger = Logger(debug=False)
     main()

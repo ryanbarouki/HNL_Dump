@@ -5,7 +5,7 @@ from particles.muon import Muon
 from particles.pion import Pion
 from particle_masses import *
 from momentum4 import Momentum4
-from utils import generate_samples, get_two_body_momenta, DEBUG_AVERAGE_MOMENTUM
+from utils import generate_samples, get_two_body_momenta, DEBUG_AVERAGE_MOMENTUM, allowed_e1_e2_three_body_decays
 from .particle import Particle
 from decay_type import DecayType
 from mixing_type import MixingType
@@ -156,11 +156,12 @@ class HNL(Particle):
         Logger().log(f"{channel_code} partial width: {partial_decay}")
         self.average_propagation_factor[channel_code] = self.__get_prop_factor_for_regime(partial_decay)
         
-        e_elec = np.linspace(0, self.m/2, 1000, endpoint=False)
+        e_elec = np.linspace(ELECTRON_MASS, (self.m**2 + ELECTRON_MASS**2)/(2*self.m), 1000, endpoint=False)
         e_muon = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000, endpoint=False)
+        # NOTE region found from https://halldweb.jlab.org/DocDB/0033/003345/002/dalitz.pdf
         lepton_energy_samples = generate_samples(e_elec, e_muon, \
             dist_func=self.__electron_muon_dist, n_samples=self.beam.num_samples, \
-            region=lambda e_elec, e_muon: e_elec + e_muon > self.m/2)
+            region=lambda e_elec, e_muon: allowed_e1_e2_three_body_decays(e_elec, e_muon, e_parent=self.m, m1=ELECTRON_MASS, m2=MUON_MASS, m3=NEUTRINO_MASS))
         
         elec = Electron()
         muon = Muon()
@@ -170,13 +171,11 @@ class HNL(Particle):
         elec_e_min = 0.8 #GeV
         muon_e_min = 3. #GeV
         mT_max = 1.85 #GeV
-        count_invalids = 0
         for i in range(total_signal_length):
             momenta = self.__get_lepton_momenta_lab_frame(lepton_energy_samples[i], self.momenta[i], elec, muon)
             if momenta:
                 p_elec, p_muon, p_tot = momenta
             else:
-                count_invalids += 1
                 continue
 
             # apply cuts here
@@ -184,7 +183,6 @@ class HNL(Particle):
                 # NOTE we only need this signal if we want to plot
                 signal.append([p_elec, p_muon, p_tot]) 
 
-        Logger().log(f"Invalid cos count: {count_invalids}")
         self.efficiency[channel_code] = len(signal)/total_signal_length
         Logger().log(f"{channel_code} channel efficiency: {self.efficiency[channel_code]}")
 
@@ -198,7 +196,7 @@ class HNL(Particle):
         e_l_minus = np.linspace(0, self.m/2, 1000)
         lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, \
             dist_func=lambda ep, em: self.__electron_positron_dist_dirac(ep, em, decay_type=DECAY_TYPE), n_samples=self.beam.num_samples, \
-            region=lambda ep, em: ep + em > self.m/2)
+            region=lambda ep, em: allowed_e1_e2_three_body_decays(ep, em, e_parent=self.m, m1=ELECTRON_MASS, m2=ELECTRON_MASS, m3=NEUTRINO_MASS))
         
         elec1 = Electron()
         elec2 = Electron()
@@ -229,7 +227,7 @@ class HNL(Particle):
             p2 = np.sqrt(e2**2 - lepton2.m**2)
             cos_th_12 = (lepton1.m**2 + lepton2.m**2 + 2*e1*e2 - self.m**2 + 2*self.m*e3)/(2*p1*p2)
             if abs(cos_th_12) > 1:
-                # Logger().log(f"invalid cos: {cos_th_12}")
+                Logger().log(f"invalid cos: {cos_th_12}")
                 return None
             theta_12 = np.arccos(cos_th_12) # takes values between 0, pi
             theta_1 = np.random.uniform(0, 2*np.pi) # angle of one of the leptons uniformly between 0, 2pi. This is like the cone angle

@@ -19,7 +19,6 @@ class BeamExperiment:
         self.detector_distance = DETECTOR_DISTANCE
         self.linear_regime = True
         self.mixing_squared = 1
-        #TODO everything should just use this mixing type
         self.mixing_type = mixing_type
         self.num_samples = num_samples
         if mixing_type == MixingType.electron:
