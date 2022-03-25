@@ -11,6 +11,10 @@ from decay_type import DecayType
 from mixing_type import MixingType
 from fundamental_constants import *
 from logger import Logger
+from hnl_decay_channels.e_pair import ElectronPair
+from hnl_decay_channels.e_mu import ElectronMuon
+from hnl_decay_channels.e_pi import ElectronPion
+from hnl_decay_channels.mu_pair import MuonPair
 
 # NOTE this is only a parameter to compare with previous work which only considered the CC decay channels
 # so this could be removed entirely and treated in full
@@ -31,68 +35,6 @@ class HNL(Particle):
             "mu+mu+nu": self.decay_to_mu_pair,
             "e+pi": self.decay_to_e_pi
         }
-
-    def __electron_positron_dist_majorana(self, ep, em, decay_type = DecayType.CCNC):
-        gr = SIN_WEINB**2 - 1/2
-        gl = SIN_WEINB**2
-        if decay_type == DecayType.CC:
-            gr = 0
-            gl = 0
-        elif decay_type == DecayType.NC:
-            gl = gl - 1
-        output = ((1+gl)**2 + gr**2)*(self.m*(ep + em) - 2*(ep**2 + em**2))
-        return output
-
-    # TODO split out the partial decay rates and differential distributions into 
-    # a class for each channel
-    def __electron_positron_dist_dirac(self, ep, em, decay_type=DecayType.CCNC):
-        gr = SIN_WEINB**2 - 1/2
-        gl = SIN_WEINB**2
-        if decay_type == DecayType.CC:
-            gr = 0
-            gl = 0
-        elif decay_type == DecayType.NC:
-            gl = gl - 1
-        output = gr**2*em*(self.m - 2*em) + (1-gl)**2*ep*(self.m - 2*ep)
-        return output
-
-    def __electron_muon_dist(self, e_elec, e_muon):
-        # https://arxiv.org/abs/hep-ph/9703333
-        xm = MUON_MASS/self.m
-        x_mu = 2*e_muon/self.m
-        return x_mu*(1 - x_mu + xm**2)
-
-    def __muon_pair_dist(self, e_plus, e_minus):
-        #TODO find and implement
-        # https://arxiv.org/abs/hep-ph/9703333 not sure if the one there is correct for electrons and tau
-        pass
-
-    def __partial_decay_rate_to_electron_pair(self, decay_type=DecayType.CCNC):
-        c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
-        c2 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
-        if self.beam.mixing_type == MixingType.electron:
-            # Ne -> e+ e- nu_e
-            if decay_type == DecayType.CC:
-                return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))
-            elif decay_type == DecayType.CCNC:
-                return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*c2
-            else:
-                raise Exception("No value for only neutral current")
-        elif self.beam.mixing_type == MixingType.tau:
-            # N_tau -> e+ e- nu_tau
-            return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*c1
-    
-    def __partial_decay_rate_to_muon_pair(self):
-        # Boiarska et al
-        c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
-        return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*c1
-
-    def __partial_decay_rate_to_electron_muon(self):
-        if self.beam.mixing_type == MixingType.electron:
-            # https://arxiv.org/abs/hep-ph/9703333
-            xm = MUON_MASS/self.m
-            func_form = 1 - 8*xm**2 + 8*xm**6 + xm**8 - 12*xm**4*np.log(xm**2)
-            return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3)*func_form)
 
     def __partial_decay_rate_to_electron_pi(self):
         if self.beam.mixing_type == MixingType.electron:
@@ -141,7 +83,8 @@ class HNL(Particle):
         return self
 
     def decay_to_e_pi(self, channel_code):
-        partial_decay = self.__partial_decay_rate_to_electron_pi()
+        decay_channel = ElectronPion(beam=self.beam, parent=self)
+        partial_decay = decay_channel.partial_decay_rate()
         Logger().log(f"{channel_code} partial width {partial_decay}")
         self.average_propagation_factor[channel_code] = self.__get_prop_factor_for_regime(partial_decay)
 
@@ -167,7 +110,8 @@ class HNL(Particle):
         Logger().log(f"{channel_code} channel efficiency: {self.efficiency[channel_code]}")
 
     def decay_to_e_mu(self, channel_code):
-        partial_decay = self.__partial_decay_rate_to_electron_muon()
+        decay_channel = ElectronMuon(beam=self.beam, parent=self)
+        partial_decay = decay_channel.partial_decay_rate()
         Logger().log(f"{channel_code} partial width: {partial_decay}")
         self.average_propagation_factor[channel_code] = self.__get_prop_factor_for_regime(partial_decay)
         
@@ -175,7 +119,7 @@ class HNL(Particle):
         e_muon = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000, endpoint=False)
         # NOTE region found from https://halldweb.jlab.org/DocDB/0033/003345/002/dalitz.pdf
         lepton_energy_samples = generate_samples(e_elec, e_muon, \
-            dist_func=self.__electron_muon_dist, n_samples=self.beam.num_samples, \
+            dist_func=decay_channel.diff_distrubution, n_samples=self.beam.num_samples, \
             region=lambda e_elec, e_muon: allowed_e1_e2_three_body_decays(e_elec, e_muon, e_parent=self.m, m1=ELECTRON_MASS, m2=MUON_MASS, m3=NEUTRINO_MASS))
         
         elec = Electron()
@@ -203,14 +147,15 @@ class HNL(Particle):
 
     def decay_to_e_pair(self, channel_code):
         # Decay Ne/tau -> e+ e- nu_e/tau
-        partial_decay = self.__partial_decay_rate_to_electron_pair(decay_type=DECAY_TYPE)
+        decay_channel = ElectronPair(beam=self.beam, parent=self)
+        partial_decay = decay_channel.partial_decay_rate(decay_type=DECAY_TYPE)
         Logger().log(f"{channel_code} partial width: {partial_decay}")
         self.average_propagation_factor[channel_code] = self.__get_prop_factor_for_regime(partial_decay)
         
         e_l_plus = np.linspace(0, self.m/2, 1000)
         e_l_minus = np.linspace(0, self.m/2, 1000)
         lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, \
-            dist_func=lambda ep, em: self.__electron_positron_dist_dirac(ep, em, decay_type=DECAY_TYPE), n_samples=self.beam.num_samples, \
+            dist_func=lambda ep, em: decay_channel.diff_distribution(ep, em, decay_type=DECAY_TYPE), n_samples=self.beam.num_samples, \
             region=lambda ep, em: allowed_e1_e2_three_body_decays(ep, em, e_parent=self.m, m1=ELECTRON_MASS, m2=ELECTRON_MASS, m3=NEUTRINO_MASS))
         
         elec1 = Electron()
@@ -236,14 +181,15 @@ class HNL(Particle):
         Logger().log(f"{channel_code} channel efficiency: {self.efficiency[channel_code]}")
     
     def decay_to_mu_pair(self, channel_code):
-        partial_decay = self.__partial_decay_rate_to_muon_pair()
+        decay_channel = MuonPair(beam=self.beam, parent=self)
+        partial_decay = decay_channel.partial_decay_rate()
         Logger().log(f"{channel_code} partial width: {partial_decay}")
         self.average_propagation_factor[channel_code] = self.__get_prop_factor_for_regime(partial_decay)
 
         mu_plus = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000, endpoint=False)
         mu_minus = np.linspace(MUON_MASS, (self.m**2 + MUON_MASS**2)/(2*self.m), 1000, endpoint=False)
         lepton_energy_samples = generate_samples(mu_plus, mu_minus, \
-            dist_func=lambda mu_p, mu_m: self.__muon_pair_dist(mu_p, mu_m), n_samples=self.beam.num_samples, \
+            dist_func=lambda mu_p, mu_m: decay_channel.diff_distribution(mu_p, mu_m), n_samples=self.beam.num_samples, \
             region=lambda mu_p, mu_m: allowed_e1_e2_three_body_decays(mu_p, mu_m, e_parent=self.m, m1=MUON_MASS, m2=MUON_MASS, m3=NEUTRINO_MASS))
         
         muon1 = Muon()
