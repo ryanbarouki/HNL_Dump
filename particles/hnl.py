@@ -24,6 +24,7 @@ class HNL(Particle):
         self.efficiency = {}
 
         # NOTE add more HNL decay channels here
+        # TODO consider which decays are kinematically allowed
         self.decay_funcs = {
             "e+pos+nu": self.decay_to_e_pair,
             "mu+e+nu": self.decay_to_e_mu,
@@ -42,6 +43,8 @@ class HNL(Particle):
         output = ((1+gl)**2 + gr**2)*(self.m*(ep + em) - 2*(ep**2 + em**2))
         return output
 
+    # TODO split out the partial decay rates and differential distributions into 
+    # a class for each channel
     def __electron_positron_dist_dirac(self, ep, em, decay_type=DecayType.CCNC):
         gr = SIN_WEINB**2 - 1/2
         gl = SIN_WEINB**2
@@ -114,6 +117,7 @@ class HNL(Particle):
         return np.average(factors)
 
     def __total_decay_rate(self):
+        # TODO this should just sum all the partial decay rates
         c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         c2 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         if self.beam.mixing_type == MixingType.electron:
