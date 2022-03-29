@@ -65,7 +65,6 @@ class HNL(Particle):
         if self.beam.mixing_type == MixingType.electron:
             return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(c1 + c2 + 1) + self.__partial_decay_rate_to_electron_pi()
         elif self.beam.mixing_type == MixingType.tau:
-            # TODO double check this 
             return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(2*c1)
 
     def __get_prop_factor_for_regime(self, partial_decay):

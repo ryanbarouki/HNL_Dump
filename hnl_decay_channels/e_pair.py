@@ -9,6 +9,7 @@ class ElectronPair:
         self.parent = parent
 
     def partial_decay_rate(self, decay_type=DecayType.CCNC):
+        # https://arxiv.org/pdf/2109.03831.pdf
         c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         c2 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         if self.beam.mixing_type == MixingType.electron:
