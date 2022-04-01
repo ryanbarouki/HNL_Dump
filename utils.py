@@ -118,3 +118,22 @@ def write_to_file_csv(samples, filepath):
             row += "," if i != len(arr) - 1 else "\n"
         f.write(row)
     f.close()
+
+def get_lepton_momenta_lab_frame(lepton_energies, hnl_momentum, parent, lepton1, lepton2):
+    e1, e2 = lepton_energies
+    e3 = parent.m - (e1 + e2)
+    p1 = np.sqrt(e1**2 - lepton1.m**2)
+    p2 = np.sqrt(e2**2 - lepton2.m**2)
+    cos_th_12 = (lepton1.m**2 + lepton2.m**2 + 2*e1*e2 - parent.m**2 + 2*parent.m*e3)/(2*p1*p2)
+    if abs(cos_th_12) > 1:
+        Logger().log(f"invalid cos: {cos_th_12}")
+        return None
+    theta_12 = np.arccos(cos_th_12) # takes values between 0, pi
+    theta_1 = np.random.uniform(0, 2*np.pi) # angle of one of the leptons uniformly between 0, 2pi. This is like the cone angle
+    theta_2 = theta_1 + theta_12
+    cos_theta_1 = np.cos(theta_1)
+    cos_theta_2 = np.cos(theta_2)
+    p1 = Momentum4.from_polar(e1, cos_theta_1, 0, lepton1.m).boost(hnl_momentum)
+    p2 = Momentum4.from_polar(e2, cos_theta_2, 0, lepton2.m).boost(hnl_momentum)
+    p_tot = p1 + p2
+    return p1,p2,p_tot

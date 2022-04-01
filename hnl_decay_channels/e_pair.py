@@ -1,8 +1,13 @@
 import numpy as np
-from decay_type import DecayType
 from fundamental_constants import *
 from mixing_type import MixingType
-
+from utils import generate_samples, allowed_e1_e2_three_body_decays, get_lepton_momenta_lab_frame
+from particle_masses import *
+from particles.electron import Electron
+from decay_type import DecayType
+# NOTE this is only a parameter to compare with previous work which only considered the CC decay channels
+# so this could be removed entirely and treated in full
+DECAY_TYPE = DecayType.CCNC
 class ElectronPair:
     def __init__(self, beam, parent) -> None:
         self.beam = beam
@@ -25,6 +30,7 @@ class ElectronPair:
             return self.beam.mixing_squared*(GF**2*self.parent.m**5/(192*np.pi**3))*c1
 
     def diff_distribution(self, ep, em, decay_type=DecayType.CCNC):
+        # https://arxiv.org/pdf/2109.03831.pdf
         gr = SIN_WEINB**2 - 1/2
         gl = SIN_WEINB**2
         if decay_type == DecayType.CC:
@@ -34,3 +40,33 @@ class ElectronPair:
             gl = gl - 1
         output = gr**2*em*(self.parent.m - 2*em) + (1-gl)**2*ep*(self.parent.m - 2*ep)
         return output
+
+    def decay(self):
+        # Decay Ne/tau -> e+ e- nu_e/tau
+        e_l_plus = np.linspace(0, self.parent.m/2, 1000)
+        e_l_minus = np.linspace(0, self.parent.m/2, 1000)
+        lepton_energy_samples = generate_samples(e_l_plus, e_l_minus, \
+            dist_func=lambda ep, em: self.diff_distribution(ep, em, decay_type=DECAY_TYPE), n_samples=self.beam.num_samples, \
+            region=lambda ep, em: allowed_e1_e2_three_body_decays(ep, em, e_parent=self.parent.m, m1=ELECTRON_MASS, m2=ELECTRON_MASS, m3=NEUTRINO_MASS))
+        
+        elec1 = Electron()
+        elec2 = Electron()
+        signal = []
+        total_signal_length = min(len(self.parent.momenta), len(lepton_energy_samples))
+        # experimental cuts for electron pair
+        e_min = 0.8 #GeV
+        mT_max = 1.85 #GeV
+        for i in range(total_signal_length):
+            momenta = get_lepton_momenta_lab_frame(lepton_energy_samples[i], self.parent.momenta[i], self.parent, elec1, elec2)
+            if momenta:
+                p1, p2, p_tot = momenta
+            else:
+                continue
+
+            # apply cuts here
+            if p1.get_energy() > e_min and p2.get_energy() > e_min and p_tot.get_transverse_mass() < mT_max:
+                # NOTE we only need this signal if we want to plot
+                signal.append([p1, p2, p_tot]) 
+
+        efficiency = len(signal)/total_signal_length
+        return efficiency
