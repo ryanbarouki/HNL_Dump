@@ -8,21 +8,19 @@ from signal_processor import SignalProcessor
 from logger import Logger
 
 def main():
-    hnl_mass, num_samples, plot, mixing_type = parse_arguments()
+    hnl_mass, num_samples, debug, mixing_type = parse_arguments()
+    logger = Logger(debug=debug)
 
     start = time.time()
 
     beam = BeamExperiment(mixing_type=mixing_type, num_samples=num_samples)
 
     beam.start_dump(hnl_mass)
-    upper_bound_squared, cut_signal = SignalProcessor(beam).get_upper_bound()
+    upper_bound_squared = SignalProcessor(beam).get_upper_bound()
     print(f"U squared: {upper_bound_squared}")
 
     end = time.time()
     print(f"Time taken: {end-start} seconds")
-
-    if plot:
-        plot_signal(cut_signal)
 
 def plot_signal(cut_signal):
     energies = [momentum.get_energy() for momentum in cut_signal]
@@ -35,15 +33,14 @@ def parse_arguments():
     parser.add_argument('-m', type=float, help="Mass of the HNL in GeV", required=True)
     parser.add_argument('-n', type=int, help="Number of samples", required=True)
     parser.add_argument('--mixing', type=str, choices=['electron', 'tau'], help="valid values: 'electron' or 'tau'", required=True)
-    parser.add_argument('--plot', action='store_true', help="A boolean value whether to plot")
+    parser.add_argument('--debug', action='store_true', help="Print debug logs")
     args = parser.parse_args()
 
     hnl_mass = args.m
     num_samples = args.n
-    plot = args.plot
+    debug = args.debug
     mixing_type = MixingType[args.mixing]
-    return hnl_mass,num_samples,plot,mixing_type
+    return hnl_mass,num_samples,debug,mixing_type
 
 if __name__ == "__main__":
-    logger = Logger(debug=False)
     main()

@@ -19,15 +19,19 @@ class SignalProcessor:
         if len(hnls) == 0:
             raise Exception("No HNLs!")
 
-        total_decays = 0
-        for channel in self.beam.channels:
-            total_decays_from_channel, cut_signal = self.get_total_decays(hnls, channel)
-            total_decays += total_decays_from_channel
+        total_decays = self.get_total_decays(hnls)
 
         upper_bound_squared = np.sqrt(OBSERVED_EVENTS/total_decays)
-        return upper_bound_squared, cut_signal
+        return upper_bound_squared
 
-    def get_total_decays(self, hnls, channel):
+    def get_total_decays(self, hnls):
+        total_decays = 0
+        for channel in self.beam.channels:
+            total_decays_from_channel = self.get_total_decays_for_channel(hnls, channel)
+            total_decays += total_decays_from_channel
+        return total_decays
+
+    def get_total_decays_for_channel(self, hnls, channel):
         logger = Logger()
         total_decays = 0
         for hnl in hnls:
@@ -55,13 +59,14 @@ class SignalProcessor:
                     logger.log("Flux norm (Ds): {:e}".format(total_flux))
 
             total_decays += total_flux*prop_factor*efficiency*acceptance
-        return total_decays, []
+        return total_decays
 
     def total_decays_less_than_observed(self):
         hnls = self.beam.find_instances_of_type(HNL)
         if len(hnls) == 0:
             raise Exception("No HNLs!")
-        total_decays, cut_signal = self.get_total_decays(hnls, channel="e+e-v")
+
+        total_decays = self.get_total_decays(hnls)
         print(f"Total decays: {total_decays}")
         return total_decays < OBSERVED_EVENTS
 

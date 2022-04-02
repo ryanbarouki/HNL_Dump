@@ -24,8 +24,11 @@ class MuonPair:
         return output
 
     def decay(self):
-        mu_plus = np.linspace(MUON_MASS, (self.parent.m**2 + MUON_MASS**2)/(2*self.parent.m), 1000, endpoint=False)
-        mu_minus = np.linspace(MUON_MASS, (self.parent.m**2 + MUON_MASS**2)/(2*self.parent.m), 1000, endpoint=False)
+        # TODO change this when you get the correct distribution
+        # mu_plus = np.linspace(MUON_MASS, (self.parent.m**2 + MUON_MASS**2)/(2*self.parent.m), 1000, endpoint=False)
+        # mu_minus = np.linspace(MUON_MASS, (self.parent.m**2 + MUON_MASS**2)/(2*self.parent.m), 1000, endpoint=False)
+        mu_plus = np.linspace(0, self.parent.m/2, 1000)
+        mu_minus = np.linspace(0, self.parent.m/2, 1000)
         lepton_energy_samples = generate_samples(mu_plus, mu_minus, \
             dist_func=lambda mu_p, mu_m: self.diff_distribution(mu_p, mu_m), n_samples=self.beam.num_samples, \
             region=lambda mu_p, mu_m: allowed_e1_e2_three_body_decays(mu_p, mu_m, e_parent=self.parent.m, m1=MUON_MASS, m2=MUON_MASS, m3=NEUTRINO_MASS))
@@ -38,7 +41,7 @@ class MuonPair:
         muon_e_min = 3. #GeV
         mT_max = 1.85 #GeV
         for i in range(total_signal_length):
-            momenta = get_lepton_momenta_lab_frame(lepton_energy_samples[i], self.momenta[i], self.parent, muon1, muon2)
+            momenta = get_lepton_momenta_lab_frame(lepton_energy_samples[i], self.parent.momenta[i], self.parent, muon1, muon2)
             if momenta:
                 p1, p2, p_tot = momenta
             else:

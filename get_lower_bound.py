@@ -15,16 +15,13 @@ def total_decays_less_than_observed(hnl_mass, mixing_squared, num_samples, mixin
     return total_decays_less_than_observed
 
 def main():
-    # TODO make this stuff work again
-    hnl_masses = np.linspace(0.2, 1.2, 10)
-    mixings_squared = np.linspace(1e-3, 1e-2, 10)
-
-    lower_mixing = 1e-3
-    upper_mixing = 1e-2
+    lower_mixing = 1e-5
+    upper_mixing = 1
     mixing = (upper_mixing + lower_mixing)/2
     prev_mixing = lower_mixing
     it = 0
     while abs((prev_mixing - mixing)/mixing) > 0.0005 and it < 25: 
+        print(f"Mixing: {mixing}")
         less_decays_than_observed = total_decays_less_than_observed(1.5, mixing, 10000, MixingType.electron)
         if less_decays_than_observed:
             upper_mixing = mixing
@@ -37,7 +34,6 @@ def main():
     print("Lower bound: {:e}".format(mixing))    
 
 
-    # is_mixing_too_small(1.5, 6.21e-3, 10000, MixingType.electron)
 if __name__ == "__main__":
     logger = Logger(debug=False)
     main()
