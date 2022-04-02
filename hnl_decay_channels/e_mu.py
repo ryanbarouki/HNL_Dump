@@ -54,3 +54,6 @@ class ElectronMuon:
 
         efficiency = len(signal)/total_signal_length
         return efficiency
+
+    def is_kinematically_allowed(self):
+        return ELECTRON_MASS + MUON_MASS < self.parent.m 

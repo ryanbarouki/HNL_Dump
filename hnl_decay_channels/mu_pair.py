@@ -24,7 +24,7 @@ class MuonPair:
         return output
 
     def decay(self):
-        # TODO change this when you get the correct distribution
+        # FIXME change this when you get the correct distribution
         # mu_plus = np.linspace(MUON_MASS, (self.parent.m**2 + MUON_MASS**2)/(2*self.parent.m), 1000, endpoint=False)
         # mu_minus = np.linspace(MUON_MASS, (self.parent.m**2 + MUON_MASS**2)/(2*self.parent.m), 1000, endpoint=False)
         mu_plus = np.linspace(0, self.parent.m/2, 1000)
@@ -54,3 +54,6 @@ class MuonPair:
 
         efficiency = len(signal)/total_signal_length
         return efficiency
+
+    def is_kinematically_allowed(self):
+        return 2*MUON_MASS < self.parent.m 

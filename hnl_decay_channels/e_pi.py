@@ -41,3 +41,6 @@ class ElectronPion:
         
         efficiency= len(cut_signal)/len(signal)
         return efficiency
+
+    def is_kinematically_allowed(self):
+        return ELECTRON_MASS + PION_MASS < self.parent.m 

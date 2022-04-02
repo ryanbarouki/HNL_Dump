@@ -70,6 +70,8 @@ class HNL(Particle):
         for channel_code in self.beam.channels:
             if channel_code in self.decay_channels:
                 decay_channel = self.decay_channels[channel_code](beam=self.beam, parent=self)
+                if not decay_channel.is_kinematically_allowed():
+                    continue
                 self.active_channels.append(decay_channel)
                 partial_decay = decay_channel.partial_decay_rate()
                 Logger().log(f"{channel_code} partial decay rate: {partial_decay}")

@@ -72,3 +72,6 @@ class ElectronPair:
 
         efficiency = len(signal)/total_signal_length
         return efficiency
+
+    def is_kinematically_allowed(self):
+        return 2*ELECTRON_MASS < self.parent.m 
