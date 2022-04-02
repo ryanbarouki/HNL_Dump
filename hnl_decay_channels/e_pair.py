@@ -31,6 +31,8 @@ class ElectronPair:
 
     def diff_distribution(self, ep, em, decay_type=DecayType.CCNC):
         # https://arxiv.org/pdf/2109.03831.pdf
+        if self.beam.mixing_type == MixingType.tau:
+            decay_type = DecayType.NC
         gr = SIN_WEINB**2 - 1/2
         gl = SIN_WEINB**2
         if decay_type == DecayType.CC:
