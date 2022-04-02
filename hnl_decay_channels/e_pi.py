@@ -12,8 +12,12 @@ class ElectronPion:
         self.parent = parent
 
     def partial_decay_rate(self):
+        # NOTE using https://arxiv.org/pdf/1805.08567.pdf (3.6)
         if self.beam.mixing_type == MixingType.electron:
-            phase_factor = 1 # TODO find this factor https://arxiv.org/pdf/1805.08567.pdf
+            xl = ELECTRON_MASS/self.parent.m
+            xh = PION_MASS/self.parent.m
+            l = lambda a, b, c: a**2 + b**2 + c**2 - 2*a*b - 2*a*c - 2*b*c
+            phase_factor = ((1 - xl**2)**2 - (1 + xl**2)*xh**2)*np.sqrt(l(1, xh**2, xl**2))
             return self.beam.mixing_squared*(GF**2*self.parent.m**3*F_PI**2/(16*np.pi))*phase_factor
 
     def decay(self):
