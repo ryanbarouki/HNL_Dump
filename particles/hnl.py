@@ -19,7 +19,6 @@ class HNL(Particle):
         self.efficiency = {}
 
         # NOTE add more HNL decay channels here
-        # TODO consider which decays are kinematically allowed
         self.decay_channels = {
             "e+pos+nu": ElectronPair,
             "mu+e+nu": ElectronMuon,

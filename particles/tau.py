@@ -11,7 +11,9 @@ class Tau(Particle):
         super().__init__(TAU_MASS, beam, parent, momenta)
     
     def decay(self, hnl_mass):
-        #TODO make sure the masses make sense for the decays
+        if hnl_mass > TAU_MASS:
+            return self
+
         hnl = HNL(hnl_mass, beam=self.beam, parent=self, decay_mode=TauDecayModes.hnl_lepton_nu)
         hnl2body = HNL(hnl_mass, beam=self.beam, parent=self, decay_mode=TauDecayModes.hnl_pi)
         pion = Pion(beam=self.beam, parent=self)
