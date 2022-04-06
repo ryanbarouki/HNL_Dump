@@ -26,15 +26,15 @@ class SignalProcessor:
 
     def get_total_decays(self, hnls):
         total_decays = 0
-        for channel in self.beam.channels:
-            total_decays_from_channel = self.get_total_decays_for_channel(hnls, channel)
+        for hnl in hnls:
+            total_decays_from_channel = self.get_total_decays_for_hnl(hnl)
             total_decays += total_decays_from_channel
         return total_decays
 
-    def get_total_decays_for_channel(self, hnls, channel):
+    def get_total_decays_for_hnl(self, hnl):
         logger = Logger()
         total_decays = 0
-        for hnl in hnls:
+        for channel in hnl.active_channels:
             efficiency = hnl.efficiency[channel]
             prop_factor = hnl.average_propagation_factor[channel]
             acceptance = hnl.acceptance

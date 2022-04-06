@@ -25,7 +25,7 @@ class HNL(Particle):
             "mu+mu+nu": MuonPair,
             "e+pi": ElectronPion
         }
-        self.active_channels = []
+        self.active_channels = {}
 
     def __average_propagation_factor(self, length_detector, decay_rate):
         factors = []
@@ -46,8 +46,8 @@ class HNL(Particle):
 
     def __total_decay_rate(self):
         total_decay_rate = 0
-        for decay_channel in self.active_channels:
-            total_decay_rate += decay_channel.partial_decay_rate()
+        for channel_code in self.active_channels:
+            total_decay_rate += self.active_channels[channel_code].partial_decay_rate()
         return total_decay_rate
         # c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
         # c2 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
@@ -71,7 +71,7 @@ class HNL(Particle):
                 decay_channel = self.decay_channels[channel_code](beam=self.beam, parent=self)
                 if not decay_channel.is_kinematically_allowed():
                     continue
-                self.active_channels.append(decay_channel)
+                self.active_channels[channel_code] = decay_channel
                 partial_decay = decay_channel.partial_decay_rate()
                 Logger().log(f"{channel_code} partial decay rate: {partial_decay}")
                 self.average_propagation_factor[channel_code] = self.__get_prop_factor_for_regime(partial_decay)
