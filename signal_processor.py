@@ -54,6 +54,9 @@ class SignalProcessor:
                     if hnl.decay_mode == TauDecayModes.hnl_pi:
                         total_flux = self.__get_normalised_hnl_flux_from_tau_two_body(hnl_mass=hnl.m)
                         logger.log("Flux norm (tau 2-body): {:e}".format(total_flux))
+                    elif hnl.decay_mode == TauDecayModes.hnl_lepton_nu:
+                        # TODO find the appropriate normalisation
+                        pass
                 elif isinstance(hnl.parent, DsMeson):
                     total_flux = self.__get_normalised_tau_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
                     logger.log("Flux norm (Ds): {:e}".format(total_flux))
