@@ -53,7 +53,7 @@ def DS_TO_ELECTRON_HNL(mN):
 def TAU_TO_PI_HNL(mN):
     x = (PION_MASS/TAU_MASS)**2
     y = (mN/TAU_MASS)**2
-    l_til = l_tilde(x, y)
+    l = lambda x,y: ((1-x)**2 + (1-y)**2 - 2*x*y)/((1-x)**2)
     g = lambda x,y: ((1-y)**2 - x*(1+y))/(1-x)
     TAU_TO_PI_NUTAU = 10.82/100 # +/- 0.05%
-    return TAU_TO_PI_NUTAU*np.sqrt(l_til)*g(x,y)
+    return TAU_TO_PI_NUTAU*np.sqrt(l(x,y))*g(x,y)

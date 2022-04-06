@@ -10,7 +10,7 @@ import numpy as np
 def main():
     logger = Logger(debug=False)
     upper_bounds = []
-    hnl_masses = np.linspace(0.2, 2.0, 36, endpoint=False)
+    hnl_masses = np.linspace(0.2, 1.65, 36, endpoint=False)
     for hnl_mass in hnl_masses:
         start = time.time()
         beam = BeamExperiment(mixing_type=MixingType.tau, num_samples=10000)
