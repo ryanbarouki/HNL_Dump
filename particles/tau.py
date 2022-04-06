@@ -36,6 +36,6 @@ class Tau(Particle):
 
     def diff_decay_to_hnl_nu_lepton(self, hnl_mass, e, cos_theta):
         # valid for all leptons because the lepton mass has been neglected
-        aux0=3.+(((-4.*e)/self.m)+(((0.5*((hnl_mass**2)*(-4.+((6.*e)/self.m))))/self.m)/e))
-        output=8.*((e**2)*((np.sqrt((1.-((e**-2.)*(hnl_mass**2)))))*(aux0*(self.m**-3.))))
-        return output
+        x = 2*e/self.m
+        beta = np.sqrt(1 - (hnl_mass/e)**2)
+        return (3 - 2*x + (3*x - 4)*(1-beta**2)*x/4)*beta*x**2
