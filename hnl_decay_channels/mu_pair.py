@@ -15,7 +15,6 @@ class MuonPair:
         return self.beam.mixing_squared*(GF**2*self.parent.m**5/(192*np.pi**3))*c1
 
     def diff_distribution(self, e_plus, e_minus):
-        # TODO this is going negative so need check
         g_p = (SIN_WEINB**2 - 1/2)**2
         g_m = SIN_WEINB**2
         output = e_minus*(self.parent.m - 2*e_minus)*g_m**2 + e_plus*(self.parent.m - 2*e_plus)*g_p**2 \
@@ -23,10 +22,8 @@ class MuonPair:
         return output
 
     def decay(self):
-        mu_plus = np.linspace(MUON_MASS, (self.parent.m**2 + MUON_MASS**2)/(2*self.parent.m), 1000, endpoint=False)
-        mu_minus = np.linspace(MUON_MASS, (self.parent.m**2 + MUON_MASS**2)/(2*self.parent.m), 1000, endpoint=False)
-        # mu_plus = np.linspace(0, self.parent.m/2, 1000)
-        # mu_minus = np.linspace(0, self.parent.m/2, 1000)
+        mu_plus = np.linspace(MUON_MASS, self.parent.m/2, 1000)
+        mu_minus = np.linspace(MUON_MASS, self.parent.m/2, 1000)
         lepton_energy_samples = generate_samples(mu_plus, mu_minus, \
             dist_func=lambda mu_p, mu_m: self.diff_distribution(mu_p, mu_m), n_samples=self.beam.num_samples, \
             region=lambda mu_p, mu_m: allowed_e1_e2_three_body_decays(mu_p, mu_m, e_parent=self.parent.m, m1=MUON_MASS, m2=MUON_MASS, m3=NEUTRINO_MASS))

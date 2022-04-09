@@ -10,10 +10,10 @@ import numpy as np
 def main():
     logger = Logger(debug=False)
     upper_bounds = []
-    hnl_masses = np.linspace(0.2, 1.65, 36, endpoint=False)
+    hnl_masses = np.linspace(0.4, 1.8, 18, endpoint=False)
     for hnl_mass in hnl_masses:
         start = time.time()
-        beam = BeamExperiment(mixing_type=MixingType.tau, num_samples=10000)
+        beam = BeamExperiment(mixing_type=MixingType.electron, num_samples=10000)
         beam.start_dump(hnl_mass)
         upper_bound_squared = SignalProcessor(beam).get_upper_bound()
         upper_bounds.append(upper_bound_squared)
