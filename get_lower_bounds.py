@@ -16,7 +16,8 @@ def total_decays_less_than_observed(hnl_mass, mixing_squared, num_samples, mixin
     return total_decays_less_than_observed
 
 def main():
-    hnl_masses, mass_range, num_samples, debug, mixing_type, plot = parse_arguments()
+    file = open("./lower_bound_data/lower_bounds.csv", "w")
+    hnl_masses, mass_range, num_samples, debug, mixing_type, plot, save = parse_arguments()
     logger = Logger(debug=debug)
     lower_bounds = []
 
@@ -48,6 +49,10 @@ def main():
         plt.plot(hnl_masses, lower_bounds)
         plt.yscale('log')
         plt.show()
+    
+    if save:
+        for i in range(len(lower_bounds)):
+            file.write(f"{hnl_masses[i]},{lower_bounds[i]}\n")
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -58,6 +63,7 @@ def parse_arguments():
     parser.add_argument('--mixing', type=str, choices=['electron', 'tau'], help="valid values: 'electron' or 'tau'", required=True)
     parser.add_argument('--debug', action='store_true', help="Print debug logs")
     parser.add_argument('--plot', action='store_true', help="Plot upper bounds")
+    parser.add_argument('--save', action='store_true', help="Save data to file")
     args = parser.parse_args()
 
     hnl_masses = args.m
@@ -65,8 +71,9 @@ def parse_arguments():
     num_samples = args.n
     debug = args.debug
     plot = args.plot
+    save = args.save
     mixing_type = MixingType[args.mixing]
-    return hnl_masses,mass_range,num_samples,debug,mixing_type,plot
+    return hnl_masses,mass_range,num_samples,debug,mixing_type,plot,save
 
 if __name__ == "__main__":
     main()
