@@ -16,8 +16,8 @@ def total_decays_less_than_observed(hnl_mass, mixing_squared, num_samples, mixin
     return total_decays_less_than_observed
 
 def main():
-    file = open("./lower_bound_data/lower_bounds.csv", "w")
     hnl_masses, mass_range, num_samples, debug, mixing_type, plot, save = parse_arguments()
+    file = open(f"./lower_bound_data/lower_bounds_{mixing_type}.csv", "a")
     logger = Logger(debug=debug)
     lower_bounds = []
 
@@ -43,16 +43,16 @@ def main():
             mixing = (upper_mixing + lower_mixing)/2
             logger.log(f"difference in mixing: {abs(prev_mixing - mixing)/mixing}")
         lower_bounds.append(mixing)
+        if save:
+            file.write(f"{hnl_mass},{mixing}\n")
         print("Mass: {}, Lower bound: {:e}".format(hnl_mass, mixing))    
     
     if plot:
         plt.plot(hnl_masses, lower_bounds)
         plt.yscale('log')
         plt.show()
-    
-    if save:
-        for i in range(len(lower_bounds)):
-            file.write(f"{hnl_masses[i]},{lower_bounds[i]}\n")
+
+    file.close()
 
 def parse_arguments():
     parser = argparse.ArgumentParser()

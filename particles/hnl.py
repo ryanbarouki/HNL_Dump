@@ -49,12 +49,6 @@ class HNL(Particle):
         for channel_code in self.active_channels:
             total_decay_rate += self.active_channels[channel_code].partial_decay_rate()
         return total_decay_rate
-        # c1 = 0.25*(1 - 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
-        # c2 = 0.25*(1 + 4*SIN_WEINB**2 + 8*SIN_WEINB**4)  
-        # if self.beam.mixing_type == MixingType.electron:
-        #     return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(c1 + c2 + 1) + self.__partial_decay_rate_to_electron_pi()
-        # elif self.beam.mixing_type == MixingType.tau:
-        #     return self.beam.mixing_squared*(GF**2*self.m**5/(192*np.pi**3))*(2*c1)
 
     def __get_prop_factor_for_regime(self, partial_decay):
         if self.beam.linear_regime:

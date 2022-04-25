@@ -9,7 +9,8 @@ from signal_processor import SignalProcessor
 from logger import Logger
 
 def main():
-    hnl_masses, mass_range, num_samples, debug, mixing_type, plot = parse_arguments()
+    hnl_masses, mass_range, num_samples, debug, mixing_type, plot, save = parse_arguments()
+    file = open(f"./upper_bound_data/upper_bounds_{mixing_type}.csv", "a")
     logger = Logger(debug=debug)
     upper_bounds = []
 
@@ -26,6 +27,8 @@ def main():
         upper_bound_squared = SignalProcessor(beam).get_upper_bound()
         upper_bounds.append(upper_bound_squared)
         print(f"mass: {hnl_mass}, bound: {upper_bound_squared}")
+        if save:
+            file.write(f"{hnl_mass},{upper_bound_squared}\n")
 
         end = time.time()
         logger.log(f"Time taken: {end-start} seconds")
@@ -34,6 +37,8 @@ def main():
         plt.plot(hnl_masses, upper_bounds)
         plt.yscale('log')
         plt.show()
+
+    file.close()
 
 def plot_signal(cut_signal):
     energies = [momentum.get_energy() for momentum in cut_signal]
@@ -50,6 +55,7 @@ def parse_arguments():
     parser.add_argument('--mixing', type=str, choices=['electron', 'tau'], help="valid values: 'electron' or 'tau'", required=True)
     parser.add_argument('--debug', action='store_true', help="Print debug logs")
     parser.add_argument('--plot', action='store_true', help="Plot upper bounds")
+    parser.add_argument('--save', action='store_true', help="Save data to file")
     args = parser.parse_args()
 
     hnl_masses = args.m
@@ -57,8 +63,9 @@ def parse_arguments():
     num_samples = args.n
     debug = args.debug
     plot = args.plot
+    save = args.save
     mixing_type = MixingType[args.mixing]
-    return hnl_masses,mass_range,num_samples,debug,mixing_type,plot
+    return hnl_masses,mass_range,num_samples,debug,mixing_type,plot,save
 
 if __name__ == "__main__":
     main()

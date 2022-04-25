@@ -70,7 +70,7 @@ class SignalProcessor:
             raise Exception("No HNLs!")
 
         total_decays = self.get_total_decays(hnls)
-        print(f"Total decays: {total_decays}")
+        print(f"Mixing: {self.beam.mixing_squared}, Total decays: {total_decays}")
         return total_decays < OBSERVED_EVENTS
 
     def __get_normalised_hnl_flux_from_DpDm_mesons(self, hnl_mass):
