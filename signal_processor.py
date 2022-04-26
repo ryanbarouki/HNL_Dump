@@ -71,7 +71,7 @@ class SignalProcessor:
 
         total_decays = self.get_total_decays(hnls)
         print(f"Mixing: {self.beam.mixing_squared}, Total decays: {total_decays}")
-        return total_decays < OBSERVED_EVENTS
+        return total_decays - OBSERVED_EVENTS
 
     def __get_normalised_hnl_flux_from_DpDm_mesons(self, hnl_mass):
         return ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DPDM_X*BR.D_TO_E_HNL(hnl_mass, self.beam.mixing_squared))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)

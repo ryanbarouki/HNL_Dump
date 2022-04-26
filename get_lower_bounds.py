@@ -1,5 +1,6 @@
 #!/usr/local/bin/python3
 import argparse
+from cmath import inf
 import numpy as np
 import matplotlib.pyplot as plt
 from beam import BeamExperiment
@@ -31,10 +32,18 @@ def main():
         mixing = (upper_mixing + lower_mixing)/2
         prev_mixing = lower_mixing
         it = 0
-        while abs((prev_mixing - mixing)/mixing) > 0.0005 and it < 25: 
+        min_difference = inf
+        closest_bound = 0
+        while abs((prev_mixing - mixing)/mixing) > 0.005 and it < 25: 
             logger.log(f"Mixing: {mixing}")
             less_decays_than_observed = total_decays_less_than_observed(hnl_mass, mixing, num_samples, mixing_type)
-            if less_decays_than_observed:
+
+            diff = abs(less_decays_than_observed)
+            if diff < min_difference:
+                min_difference = diff
+                closest_bound = mixing
+
+            if less_decays_than_observed < 0:
                 upper_mixing = mixing
             else:
                 lower_mixing = mixing
@@ -44,8 +53,8 @@ def main():
             logger.log(f"difference in mixing: {abs(prev_mixing - mixing)/mixing}")
         lower_bounds.append(mixing)
         if save:
-            file.write(f"{hnl_mass},{mixing}\n")
-        print("Mass: {}, Lower bound: {:e}".format(hnl_mass, mixing))    
+            file.write(f"{hnl_mass},{closest_bound}\n")
+        print("Mass: {}, Lower bound: {:e}".format(hnl_mass, closest_bound))    
     
     if plot:
         plt.plot(hnl_masses, lower_bounds)
