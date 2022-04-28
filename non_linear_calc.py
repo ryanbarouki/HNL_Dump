@@ -17,8 +17,8 @@ def total_decays_less_than_observed(hnl_mass, mixing_squared, num_samples, mixin
     return total_decays_less_than_observed
 
 def main():
-    hnl_masses, mass_range, num_samples, debug, mixing_type, plot, save = parse_arguments()
-    file = open(f"./lower_bound_data/lower_bounds_{mixing_type}.csv", "a")
+    hnl_masses, mass_range, num_samples, debug, mixing_type, plot, save, bound= parse_arguments()
+    file = open(f"./{bound}_bound_data/{bound}_bounds_{mixing_type}_non_lin.csv", "a")
     logger = Logger(debug=debug)
     lower_bounds = []
 
@@ -27,8 +27,8 @@ def main():
         hnl_masses = np.linspace(lower_mass, upper_mass, int(num_points))
 
     for hnl_mass in hnl_masses:
-        lower_mixing = 1e-5
-        upper_mixing = 1
+        lower_mixing = 1e-3
+        upper_mixing = 5e-3
         mixing = (upper_mixing + lower_mixing)/2
         prev_mixing = lower_mixing
         it = 0
@@ -44,9 +44,15 @@ def main():
                 closest_bound = mixing
 
             if less_decays_than_observed < 0:
-                upper_mixing = mixing
+                if bound == "lower":
+                    upper_mixing = mixing
+                else:
+                    lower_mixing = mixing
             else:
-                lower_mixing = mixing
+                if bound == "lower":
+                    lower_mixing = mixing
+                else:
+                    upper_mixing = mixing
             it += 1
             prev_mixing = mixing
             mixing = (upper_mixing + lower_mixing)/2
@@ -68,6 +74,7 @@ def parse_arguments():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-m', type=float, nargs='+', help="Masses of the HNL in GeV")
     group.add_argument('--mass-range', type=float, nargs='+', help="Mass range '<lower> <higher> <number_of_points>' of the HNL in GeV")
+    parser.add_argument('--bound', type=str, choices=['upper', 'lower'], help="Whether to calculate upper or lower bound", required=True)
     parser.add_argument('-n', type=int, help="Number of samples", required=True)
     parser.add_argument('--mixing', type=str, choices=['electron', 'tau'], help="valid values: 'electron' or 'tau'", required=True)
     parser.add_argument('--debug', action='store_true', help="Print debug logs")
@@ -77,12 +84,13 @@ def parse_arguments():
 
     hnl_masses = args.m
     mass_range = args.mass_range
+    bound = args.bound
     num_samples = args.n
     debug = args.debug
     plot = args.plot
     save = args.save
     mixing_type = MixingType[args.mixing]
-    return hnl_masses,mass_range,num_samples,debug,mixing_type,plot,save
+    return hnl_masses,mass_range,num_samples,debug,mixing_type,plot,save,bound
 
 if __name__ == "__main__":
     main()

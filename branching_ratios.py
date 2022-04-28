@@ -62,7 +62,9 @@ def TAU_TO_PI_HNL(mN, mixing_squared):
 def TAU_TO_HNL_L_NU_L(mN, mixing_squared):
     BR_TAU_TO_NUTAU_MU_NUMU = 17.39/100 # +/- 0.04%
     BR_TAU_TO_NUTAU_E_NUE= 17.82/100 # +/- 0.04%
-    BR_TAU_TO_NUTAU_L_NU_L = BR_TAU_TO_NUTAU_E_NUE + BR_TAU_TO_NUTAU_MU_NUMU
+    BR_TAU_TO_NUTAU_L_NU_L = BR_TAU_TO_NUTAU_E_NUE + BR_TAU_TO_NUTAU_MU_NUMU 
+    if mN + MUON_MASS > TAU_MASS:
+        BR_TAU_TO_NUTAU_L_NU_L = BR_TAU_TO_NUTAU_E_NUE
     yN = mN/TAU_MASS
     factor = (1 - 8*yN**2 + 8*yN**6 - yN**8 -12*yN**4*np.log(yN**2))
     return BR_TAU_TO_NUTAU_L_NU_L*factor*mixing_squared

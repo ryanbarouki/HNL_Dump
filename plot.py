@@ -7,10 +7,10 @@ import sys
 
 def main():
     if len(sys.argv) < 2:
-        raise Exception("Not enough arguments.'\n Usage: ./plot <filename>")    
+        raise Exception("Not enough arguments.'\n Usage: python plot.py [tau/electron]")    
 
     mixing_type = MixingType[sys.argv[1]]
-    upper_bounds = read_csv_file(f"upper_bound_data/upper_bounds_{mixing_type}.csv")
+    upper_bounds = read_csv_file(f"upper_bound_data/upper_bounds_{mixing_type}_non_linear.csv")
     lower_bounds = read_csv_file(f"lower_bound_data/lower_bounds_{mixing_type}.csv")
 
     lower_bounds.sort(key=lambda data: data[0])
