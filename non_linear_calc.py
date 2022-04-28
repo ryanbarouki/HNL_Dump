@@ -18,7 +18,7 @@ def total_decays_less_than_observed(hnl_mass, mixing_squared, num_samples, mixin
 
 def main():
     hnl_masses, mass_range, num_samples, debug, mixing_type, plot, save, bound= parse_arguments()
-    file = open(f"./{bound}_bound_data/{bound}_bounds_{mixing_type}_non_lin.csv", "a")
+    file = open(f"./{bound}_bound_data/{bound}_bounds_{mixing_type}_non_linear.csv", "a")
     logger = Logger(debug=debug)
     lower_bounds = []
 
@@ -27,8 +27,8 @@ def main():
         hnl_masses = np.linspace(lower_mass, upper_mass, int(num_points))
 
     for hnl_mass in hnl_masses:
-        lower_mixing = 1e-3
-        upper_mixing = 5e-3
+        lower_mixing = 1e-6
+        upper_mixing = 1e-4
         mixing = (upper_mixing + lower_mixing)/2
         prev_mixing = lower_mixing
         it = 0
