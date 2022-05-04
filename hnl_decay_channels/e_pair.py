@@ -1,7 +1,7 @@
 import numpy as np
 from fundamental_constants import *
 from mixing_type import MixingType
-from utils import generate_samples, allowed_e1_e2_three_body_decays, get_lepton_momenta_lab_frame
+from utils import PLOT_ENERGY_ANGLE, generate_samples, allowed_e1_e2_three_body_decays, get_lepton_momenta_lab_frame
 from particle_masses import *
 from particles.electron import Electron
 from decay_type import DecayType
@@ -53,7 +53,8 @@ class ElectronPair:
         
         elec1 = Electron()
         elec2 = Electron()
-        signal = []
+        total_momenta = []
+        cut_signal = []
         total_signal_length = min(len(self.parent.momenta), len(lepton_energy_samples))
         # experimental cuts for electron pair
         e_min = 0.8 #GeV
@@ -62,15 +63,16 @@ class ElectronPair:
             momenta = get_lepton_momenta_lab_frame(lepton_energy_samples[i], self.parent.momenta[i], self.parent, elec1, elec2)
             if momenta:
                 p1, p2, p_tot = momenta
+                total_momenta.append(p_tot) 
             else:
                 continue
 
             # apply cuts here
             if p1.get_energy() > e_min and p2.get_energy() > e_min and p_tot.get_transverse_mass() < mT_max:
-                # NOTE we only need this signal if we want to plot
-                signal.append([p1, p2, p_tot]) 
+                cut_signal.append(p_tot) 
 
-        efficiency = len(signal)/total_signal_length
+        PLOT_ENERGY_ANGLE(total_momenta,((0, 200), (0, 0.08)), filename=f"e+e-from_hnls_[{self.beam.mixing_type}]") 
+        efficiency = len(cut_signal)/total_signal_length
         return efficiency
 
     def is_kinematically_allowed(self):

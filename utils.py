@@ -1,8 +1,19 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+from cycler import cycler
 from mpl_toolkits.mplot3d import Axes3D
 from momentum4 import Momentum4
 from logger import Logger
+from experimental_constants import DETECTOR_OPENING_ANGLE
+
+plt.style.use('ja')
+
+plt.rcParams['figure.facecolor'] = 'white'
+mpl.rcParams['axes.prop_cycle'] = cycler(color=['#377eb8', '#ff7f00', '#4daf4a',
+                  '#f781bf', '#a65628', '#984ea3',
+                  '#999999', '#e41a1c', '#dede00'])
 
 def DEBUG_PLOT_MOMENTA(particle, range):
     samples = []
@@ -15,6 +26,28 @@ def DEBUG_PLOT_MOMENTA(particle, range):
     fig = plt.figure()
     plt.hist2d(samples[:,0], samples[:,1], bins=100, range=range)
     plt.show()
+
+def PLOT_ENERGY_ANGLE(momenta, range, filename, detector_cut=False):
+    if not Logger().DEBUG:
+        return
+    samples = []
+    for momentum in momenta:
+        th = np.arccos(momentum.get_cos_theta())
+        e = momentum.get_energy()
+        samples.append([e, th])
+    samples = np.array(samples)
+
+    fig = plt.figure()
+    plt.xlabel(r'$E\, [ \mathrm{GeV}]$')
+    plt.ylabel(r"$\theta\, [\mathrm{rad}]$")
+    plt.hist2d(samples[:,0], samples[:,1], bins=100, range=range)
+    current_values = plt.gca().get_yticks()
+    plt.gca().set_yticklabels(['${:.2f}$'.format(x) for x in current_values])
+
+    if detector_cut:
+        plt.plot(samples[:,0], np.linspace(DETECTOR_OPENING_ANGLE, DETECTOR_OPENING_ANGLE, len(samples[:,0])), 'k')
+    dirname = os.path.dirname(os.path.abspath(__file__))
+    plt.savefig(os.path.join(dirname, f"graphs/{filename}.png"), dpi=250)
 
 def allowed_e1_e2_three_body_decays(e1, e2, e_parent, m1, m2, m3):
     x = e_parent**2 + m1**2 + m2**2 - m3**2
@@ -133,7 +166,7 @@ def get_lepton_momenta_lab_frame(lepton_energies, hnl_momentum, parent, lepton1,
     theta_2 = theta_1 + theta_12
     cos_theta_1 = np.cos(theta_1)
     cos_theta_2 = np.cos(theta_2)
-    p1 = Momentum4.from_polar(e1, cos_theta_1, 0, lepton1.m).boost(hnl_momentum)
-    p2 = Momentum4.from_polar(e2, cos_theta_2, 0, lepton2.m).boost(hnl_momentum)
+    p1 = Momentum4.from_polar(e1, cos_theta_1, 0, lepton1.m).boost(-hnl_momentum)
+    p2 = Momentum4.from_polar(e2, cos_theta_2, 0, lepton2.m).boost(-hnl_momentum)
     p_tot = p1 + p2
     return p1,p2,p_tot

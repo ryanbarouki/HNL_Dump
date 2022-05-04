@@ -5,7 +5,7 @@ from .hnl import HNL
 from .electron import Electron
 from mixing_type import MixingType
 from particle_masses import *
-from utils import get_two_body_momenta, DEBUG_AVERAGE_MOMENTUM, DEBUG_PLOT_MOMENTA
+from utils import get_two_body_momenta, DEBUG_AVERAGE_MOMENTUM, DEBUG_PLOT_MOMENTA, PLOT_ENERGY_ANGLE
 
 class DMeson(Particle):
     """D+/- meson"""
@@ -26,7 +26,7 @@ class DMeson(Particle):
         hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)
 
         DEBUG_AVERAGE_MOMENTUM(hnl, "Average HNL momentum")
-        # DEBUG_PLOT_MOMENTA(hnl, ((0, 200), (0, 3)))
+        PLOT_ENERGY_ANGLE(hnl.momenta, ((0, 200), (0, 0.08)), filename=f"hnls_from_D_mesons_[{self.beam.mixing_type}]", detector_cut=True)
 
         hnl.decay()
 
