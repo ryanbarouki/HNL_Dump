@@ -39,15 +39,15 @@ def PLOT_ENERGY_ANGLE(momenta, range, filename, detector_cut=False):
 
     fig = plt.figure()
     plt.xlabel(r'$E\, [ \mathrm{GeV}]$')
-    plt.ylabel(r"$\theta\, [\mathrm{rad}]$")
+    plt.ylabel(r'$\theta\, [\mathrm{rad}]$')
     plt.hist2d(samples[:,0], samples[:,1], bins=100, range=range)
-    current_values = plt.gca().get_yticks()
-    plt.gca().set_yticklabels(['${:.2f}$'.format(x) for x in current_values])
+    y_values = plt.gca().get_yticks()
+    plt.gca().set_yticklabels(['${:.2f}$'.format(x) for x in y_values])
 
     if detector_cut:
         plt.plot(samples[:,0], np.linspace(DETECTOR_OPENING_ANGLE, DETECTOR_OPENING_ANGLE, len(samples[:,0])), 'k')
     dirname = os.path.dirname(os.path.abspath(__file__))
-    plt.savefig(os.path.join(dirname, f"graphs/{filename}.png"), dpi=250)
+    plt.savefig(os.path.join(dirname, f"recent_graphs/{filename}.png"), dpi=250)
 
 def allowed_e1_e2_three_body_decays(e1, e2, e_parent, m1, m2, m3):
     x = e_parent**2 + m1**2 + m2**2 - m3**2

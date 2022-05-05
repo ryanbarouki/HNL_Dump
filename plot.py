@@ -1,3 +1,4 @@
+import os
 from turtle import color
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,9 +22,19 @@ def main():
 
     # # ------------------------ Plotting --------------------------------
     plt.figure(0)
+    plt.xlabel(r'$M\, [ \mathrm{GeV}]$')
+    y_label = ""
+    if mixing_type == MixingType.tau:
+        y_label = r'$|U_{\tau}|^2$'
+    elif mixing_type == MixingType.electron:
+        y_label = r'$|U_{e}|^2$'
+        
+    plt.ylabel(y_label)
     plt.plot(upper_bounds[:,0], upper_bounds[:,1], 'k')
     plt.plot(lower_bounds[:,0], lower_bounds[:,1], 'k')
     plt.yscale('log')
+    dirname = os.path.dirname(os.path.abspath(__file__))
+    plt.savefig(os.path.join(dirname, f"recent_graphs/mass_bound_plot[{mixing_type}].png"), dpi=250)
     plt.show()
 
 def read_csv_file(filename):
