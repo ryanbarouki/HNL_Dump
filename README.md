@@ -1,4 +1,4 @@
-# HNL_Dump
+# HNL Dump
 Beam dump simulation for heavy neutral leptons (HNLs)
 
 ## How to run
