@@ -1,5 +1,6 @@
 
 import numpy as np
+from mixing_type import MixingType
 from particle_masses import *
 from utils import DEBUG_AVERAGE_MOMENTUM
 from .particle import Particle
@@ -9,6 +10,13 @@ from hnl_decay_channels.e_pair import ElectronPair
 from hnl_decay_channels.e_mu import ElectronMuon
 from hnl_decay_channels.e_pi import ElectronPion
 from hnl_decay_channels.mu_pair import MuonPair
+import scipy.integrate as integrate
+
+def I(xu, xd, xl):
+    l = lambda a, b, c: a**2 + b**2 + c**2 - 2*a*b - 2*a*c - 2*b*c
+    integrand = lambda x: (x - xl**2 - xd**2)*(1 + xu**2 - x)*np.sqrt(l(x,xl**2,xd**2)*l(1,x,xu**2))/x
+    integral = integrate.quad(integrand, (xd + xl)**2, (1-xu)**2)
+    return 12*integral[0]
 
 class HNL(Particle):
     def __init__(self, mass, beam=None, parent=None, momenta=[], decay_mode=None):
@@ -44,10 +52,50 @@ class HNL(Particle):
             factors.append(factor)
         return np.average(factors)
 
+    def __total_decay_rate_to_electron_up_down(self):
+        ckm_factor = 3*0.974**2
+        xe = ELECTRON_MASS/self.m
+        # only consider decays to up/down quarks which we take to be massless
+        return ckm_factor*(GF**2*self.m**5)/(192*np.pi**3)*self.beam.mixing_squared*I(xe, 0, 0)
+
+    def __total_neutral_decay_rate_to_ffbar(self, fermion):
+        x = 0
+        c1f = 0
+        c2f = 0
+        pre_fac = 3*GF**2*self.m**5/(192*np.pi**3)*self.beam.mixing_squared
+        if fermion == 'up':
+            x = UP_MASS/self.m
+            c1f = (1 - (8/3)*SIN_WEINB**2 + (32/9)*SIN_WEINB**4)/4
+            c2f = SIN_WEINB**2*((4/3)*SIN_WEINB**2 - 1)/3
+        elif fermion == 'down':
+            x = DOWN_MASS/self.m
+            c1f = (1 - (4/3)*SIN_WEINB**2 + (8/9)*SIN_WEINB**4)/4
+            c2f = SIN_WEINB**2*((2/3)*SIN_WEINB**2 - 1)/6
+        elif fermion == 'nu':
+            return 0.25*pre_fac
+        else:
+            raise Exception("Invalid fermion type: enter 'up' or 'down' or 'nu")
+        
+        # sqrt_fac = np.sqrt(1-4*x**2)
+        # L = np.log((1 - 3*x**2 - (1-x**2)*sqrt_fac)/(x**2*(1 + sqrt_fac)))
+        # fac1 = (1-14*x**2 - 2*x**4 - 12*x**6)*np.sqrt(1-4*x**2) + 12*x**4*(x**4-1)*L
+        # fac2 = x**2*(2 + 10*x**2 - 12*x**4)*sqrt_fac + 6*x**4*(1 - 2*x**2 + 2*x**4)*L
+        return pre_fac*(c1f)
+
+        
+    def __total_decay_rate_to_non_considered_channels(self):
+        # https://arxiv.org/pdf/1805.08567.pdf
+        total = self.__total_neutral_decay_rate_to_ffbar('up') + self.__total_neutral_decay_rate_to_ffbar('down') + self.__total_neutral_decay_rate_to_ffbar('nu')
+        if self.beam.mixing_type == MixingType.electron:
+            total += self.__total_decay_rate_to_electron_up_down()
+        return total
+
     def __total_decay_rate(self):
-        total_decay_rate = 0
-        for channel_code in self.active_channels:
-            total_decay_rate += self.active_channels[channel_code].partial_decay_rate()
+        total_decay_rate = self.__total_decay_rate_to_non_considered_channels()
+        for channel_code in self.beam.channels:
+            if channel_code in self.decay_channels:
+                decay_channel = self.decay_channels[channel_code](beam=self.beam, parent=self)
+                total_decay_rate += decay_channel.partial_decay_rate()
         return total_decay_rate
 
     def __get_prop_factor_for_regime(self, partial_decay):

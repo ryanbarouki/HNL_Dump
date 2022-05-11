@@ -28,13 +28,13 @@ def main():
 
     for hnl_mass in hnl_masses:
         lower_mixing = 1e-6
-        upper_mixing = 1e-4
+        upper_mixing = 1e-1
         mixing = (upper_mixing + lower_mixing)/2
         prev_mixing = lower_mixing
         it = 0
         min_difference = inf
         closest_bound = 0
-        while abs((prev_mixing - mixing)/mixing) > 0.005 and it < 25: 
+        while abs((prev_mixing - mixing)/mixing) > 0.0005 and it < 25: 
             logger.log(f"Mixing: {mixing}")
             less_decays_than_observed = total_decays_less_than_observed(hnl_mass, mixing, num_samples, mixing_type)
 
@@ -59,8 +59,8 @@ def main():
             logger.log(f"difference in mixing: {abs(prev_mixing - mixing)/mixing}")
         lower_bounds.append(mixing)
         if save:
-            file.write(f"{hnl_mass},{closest_bound}\n")
-        print("Mass: {}, Lower bound: {:e}".format(hnl_mass, closest_bound))    
+            file.write(f"{hnl_mass},{mixing}\n")
+        print("Mass: {}, Lower bound: {:e}".format(hnl_mass, mixing))    
     
     if plot:
         plt.plot(hnl_masses, lower_bounds)

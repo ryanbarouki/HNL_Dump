@@ -29,6 +29,7 @@ class SignalProcessor:
         for hnl in hnls:
             total_decays_from_channel = self.get_total_decays_for_hnl(hnl)
             total_decays += total_decays_from_channel
+        # NOTE: factor 2 to account for anti-HNLs
         return total_decays
 
     def get_total_decays_for_hnl(self, hnl):
