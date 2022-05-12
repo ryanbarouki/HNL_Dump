@@ -16,9 +16,9 @@ mpl.rcParams['axes.prop_cycle'] = cycler(color=['#377eb8', '#ff7f00', '#4daf4a',
 def main():
     mixing_type = MixingType.electron
     upper_bounds = read_csv_file(f"upper_bound_data/upper_bounds_{mixing_type}.csv")
-    # lower_bounds = read_csv_file(f"upper_bound_data/upper_bounds_{mixing_type}.csv")
-    lower_bounds = read_csv_file(f"lower_bound_data/lower_bounds_{mixing_type}.csv")
+    lower_bounds = read_csv_file(f"lower_bound_data/lower_bounds_{mixing_type}_non_linear.csv")
     bebc = np.array(read_csv_file("./digitised_data/electron/BEBC.csv"))
+    charm = np.array(read_csv_file("./digitised_data/electron/CHARM.csv"))
     dune = np.array(read_csv_file("./digitised_data/electron/DUNE.csv"))
     mathusla = np.array(read_csv_file("./digitised_data/electron/MATHUSLA.csv"))
     na62 = np.array(read_csv_file("./digitised_data/electron/NA62.csv"))
@@ -35,7 +35,8 @@ def main():
     plt.xlabel(r'$M\, [ \mathrm{GeV}]$')
     plt.ylabel(r'$|U_{e}|^2$')
     plt.plot(*get_cols(bebc), label="Old BEBC")
-    plt.plot(*get_cols(na62), label="NA62")
+    plt.plot(*get_cols(charm), label="CHARM")
+    plt.plot(*get_cols(na62), '--', dashes=(5,2), label="NA62")
     plt.plot(*get_cols(dune), '--', dashes=(5,2), label="DUNE")
     plt.plot(*get_cols(mathusla), '--', dashes=(5,2), label="MATHUSLA")
     plt.plot(*get_cols(ship), '--', dashes=(5,2), label="SHiP")

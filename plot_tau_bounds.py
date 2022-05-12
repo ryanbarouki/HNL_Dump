@@ -15,8 +15,9 @@ mpl.rcParams['axes.prop_cycle'] = cycler(color=['#377eb8', '#ff7f00', '#4daf4a',
                   '#999999', '#e41a1c', '#dede00'])
 def main():
     mixing_type = MixingType.tau
-    upper_bounds = read_csv_file(f"upper_bound_data/upper_bounds_{mixing_type}_non_linear.csv")
-    lower_bounds = read_csv_file(f"lower_bound_data/lower_bounds_{mixing_type}.csv")
+    upper_bounds = read_csv_file(f"upper_bound_data/upper_bounds_{mixing_type}.csv")
+    upper_bounds = [upper_bounds[i] for i in range(len(upper_bounds)) if i % 5 == 0]
+    lower_bounds = read_csv_file(f"lower_bound_data/lower_bounds_{mixing_type}_non_linear.csv")
     charm = np.array(read_csv_file("./digitised_data/tau/CHARM.csv"))
     delphi = np.array(read_csv_file("./digitised_data/tau/DELPHI.csv"))
     mathusla = np.array(read_csv_file("./digitised_data/tau/MATHUSLA.csv"))
@@ -36,7 +37,7 @@ def main():
     plt.plot(*get_cols(bounds), 'k', label="Our results")
     plt.plot(*get_cols(delphi), label="DELPHI")
     plt.plot(*get_cols(charm), label="CHARM")
-    plt.plot(*get_cols(na62), label="NA62")
+    plt.plot(*get_cols(na62), '--', dashes=(5,2), label="NA62")
     plt.plot(*get_cols(ship), '--', dashes=(5,2), label="SHiP")
     # plt.plot(*get_cols(mathusla), '--', dashes=(5,2), label="MATHUSLA")
     plt.yscale('log')
