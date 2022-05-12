@@ -1,3 +1,4 @@
+from functools import update_wrapper
 import os
 from turtle import color
 import numpy as np
@@ -19,6 +20,7 @@ def main():
     upper_bounds = [upper_bounds[i] for i in range(len(upper_bounds)) if i % 5 == 0]
     lower_bounds = read_csv_file(f"lower_bound_data/lower_bounds_{mixing_type}_non_linear.csv")
     charm = np.array(read_csv_file("./digitised_data/tau/CHARM.csv"))
+    t2k = np.array(read_csv_file("./digitised_data/tau/T2K.csv"))
     delphi = np.array(read_csv_file("./digitised_data/tau/DELPHI.csv"))
     mathusla = np.array(read_csv_file("./digitised_data/tau/MATHUSLA.csv"))
     na62 = np.array(read_csv_file("./digitised_data/tau/NA62.csv"))
@@ -31,20 +33,28 @@ def main():
     bounds = np.append(upper_bounds, lower_bounds, axis=0)
 
     # # ------------------------ Plotting --------------------------------
-    plt.figure(0)
+    dpi = 250
+    fig = plt.figure(figsize=(7, 7), dpi=dpi)
     plt.xlabel(r'$M\, [ \mathrm{GeV}]$')
     plt.ylabel(r'$|U_{\tau}|^2$')
     plt.plot(*get_cols(bounds), 'k', label="Our results")
     plt.plot(*get_cols(delphi), label="DELPHI")
     plt.plot(*get_cols(charm), label="CHARM")
+    plt.plot(*get_cols(t2k), label="T2K")
     plt.plot(*get_cols(na62), '--', dashes=(5,2), label="NA62")
     plt.plot(*get_cols(ship), '--', dashes=(5,2), label="SHiP")
-    # plt.plot(*get_cols(mathusla), '--', dashes=(5,2), label="MATHUSLA")
+    plt.plot(*get_cols(mathusla), '--', dashes=(5,2), label="MATHUSLA")
     plt.yscale('log')
     plt.legend(fontsize="small")
     plt.xlim([0,3])
     dirname = os.path.dirname(os.path.abspath(__file__))
-    plt.savefig(os.path.join(dirname, f"recent_graphs/mass_bound_plot[{mixing_type}].png"), dpi=250)
+    plt.fill(*get_cols(bounds), color="#ddd")
+    # plt.fill(*get_cols(delphi), color="#ddd")
+    plt.fill_between(*get_cols(delphi), 1, color="#ddd")
+    # plt.fill(*get_cols(charm), color="#ddd")
+    plt.fill_between(*get_cols(charm), 1, color="#ddd")
+    plt.fill_between(*get_cols(t2k), 1, color="#ddd")
+    plt.savefig(os.path.join(dirname, f"recent_graphs/mass_bound_plot[{mixing_type}].png"), dpi=dpi)
     plt.show()
 
 def get_cols(array: np.ndarray):

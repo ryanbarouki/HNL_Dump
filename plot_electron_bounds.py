@@ -19,6 +19,7 @@ def main():
     lower_bounds = read_csv_file(f"lower_bound_data/lower_bounds_{mixing_type}_non_linear.csv")
     bebc = np.array(read_csv_file("./digitised_data/electron/BEBC.csv"))
     charm = np.array(read_csv_file("./digitised_data/electron/CHARM.csv"))
+    t2k = np.array(read_csv_file("./digitised_data/electron/T2K.csv"))
     dune = np.array(read_csv_file("./digitised_data/electron/DUNE.csv"))
     mathusla = np.array(read_csv_file("./digitised_data/electron/MATHUSLA.csv"))
     na62 = np.array(read_csv_file("./digitised_data/electron/NA62.csv"))
@@ -31,11 +32,13 @@ def main():
     bounds = np.append(upper_bounds, lower_bounds, axis=0)
 
     # # ------------------------ Plotting --------------------------------
-    plt.figure(0)
+    dpi = 250
+    fig = plt.figure(figsize=(7, 7), dpi=dpi)
     plt.xlabel(r'$M\, [ \mathrm{GeV}]$')
     plt.ylabel(r'$|U_{e}|^2$')
     plt.plot(*get_cols(bebc), label="Old BEBC")
     plt.plot(*get_cols(charm), label="CHARM")
+    plt.plot(*get_cols(t2k), label="T2K")
     plt.plot(*get_cols(na62), '--', dashes=(5,2), label="NA62")
     plt.plot(*get_cols(dune), '--', dashes=(5,2), label="DUNE")
     plt.plot(*get_cols(mathusla), '--', dashes=(5,2), label="MATHUSLA")
@@ -43,8 +46,9 @@ def main():
     plt.plot(*get_cols(bounds), 'k', label="Our results")
     plt.legend(fontsize="small")
     plt.yscale('log')
+    plt.xlim([0,3])
     dirname = os.path.dirname(os.path.abspath(__file__))
-    plt.savefig(os.path.join(dirname, f"recent_graphs/mass_bound_plot[{mixing_type}].png"), dpi=250)
+    plt.savefig(os.path.join(dirname, f"recent_graphs/mass_bound_plot[{mixing_type}].png"), dpi=dpi)
     plt.show()
 
 def get_cols(array: np.ndarray):
