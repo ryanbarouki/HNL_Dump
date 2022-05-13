@@ -46,7 +46,7 @@ def main():
     plt.plot(*get_cols(mathusla), '--', dashes=(5,2), label="MATHUSLA")
     plt.yscale('log')
     plt.legend(fontsize="small")
-    plt.xlim([0,3])
+    plt.xlim([min(charm[:,0]),3])
     dirname = os.path.dirname(os.path.abspath(__file__))
     plt.fill(*get_cols(bounds), color="#ddd")
     # plt.fill(*get_cols(delphi), color="#ddd")

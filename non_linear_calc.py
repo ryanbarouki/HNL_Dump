@@ -28,7 +28,7 @@ def main():
 
     for hnl_mass in hnl_masses:
         lower_mixing = 1e-6
-        upper_mixing = 1e-1
+        upper_mixing = 1
         mixing = (upper_mixing + lower_mixing)/2
         prev_mixing = lower_mixing
         it = 0
