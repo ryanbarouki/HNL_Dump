@@ -56,7 +56,7 @@ class BeamExperiment:
         for sample in samples:
             pp, pt2 = sample
             e = np.sqrt(pp**2 + pt2 + mass**2)
-            com_momentum = Momentum4.from_e_pt_pp(e, np.sqrt(pt2), pp, 0, mass)
+            com_momentum = Momentum4.from_e_pt_pp(e, np.sqrt(pt2), pp, np.random.uniform(0, 2*np.pi), mass)
             lab_momentum = com_momentum.boost(-self.beam_momentum)
             momentum += lab_momentum.get_total_momentum()
             momentum4_samples.append(lab_momentum)

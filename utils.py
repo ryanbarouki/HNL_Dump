@@ -66,7 +66,7 @@ def e_cos_theta_to_momentum4(samples, mass):
     momentum4_samples = []
     for sample in samples:
         e, cos_theta = sample
-        momentum4_samples.append(Momentum4.from_polar(e, cos_theta, 0, mass))
+        momentum4_samples.append(Momentum4.from_polar(e, cos_theta, np.random.uniform(0, 2*np.pi), mass))
     return np.array(momentum4_samples)
 
 def e_cos_theta_phi_to_momentum4(samples, mass):
