@@ -52,13 +52,13 @@ class HNL(Particle):
             factors.append(factor)
         return np.average(factors)
 
-    def __total_decay_rate_to_electron_up_down(self):
+    def __decay_rate_to_electron_up_down(self):
         ckm_factor = 3*0.974**2
         xe = ELECTRON_MASS/self.m
         # only consider decays to up/down quarks which we take to be massless
         return ckm_factor*(GF**2*self.m**5)/(192*np.pi**3)*self.beam.mixing_squared*I(xe, 0, 0)
 
-    def __total_neutral_decay_rate_to_ffbar(self, fermion):
+    def __neutral_decay_rate_to_ffbar(self, fermion):
         x = 0
         c1f = 0
         c2f = 0
@@ -82,12 +82,19 @@ class HNL(Particle):
         # fac2 = x**2*(2 + 10*x**2 - 12*x**4)*sqrt_fac + 6*x**4*(1 - 2*x**2 + 2*x**4)*L
         return pre_fac*(c1f)
 
-        
+    def __decay_rate_to_pion(self):
+        x = PION_MASS/self.m
+        return ((GF**2)*(self.m**3)*(F_PI**2)/(32*np.pi))*self.beam.mixing_squared*(1-x**2)**2
+
     def __total_decay_rate_to_non_considered_channels(self):
         # https://arxiv.org/pdf/1805.08567.pdf
-        total = self.__total_neutral_decay_rate_to_ffbar('up') + self.__total_neutral_decay_rate_to_ffbar('down') + self.__total_neutral_decay_rate_to_ffbar('nu')
+        total = self.__neutral_decay_rate_to_ffbar('nu')
+        if self.m < 1.:
+            total += self.__decay_rate_to_pion()
+        else:
+            total += self.__neutral_decay_rate_to_ffbar('up') + self.__neutral_decay_rate_to_ffbar('down') 
         if self.beam.mixing_type == MixingType.electron:
-            total += self.__total_decay_rate_to_electron_up_down()
+            total += self.__decay_rate_to_electron_up_down()
         return total
 
     def __total_decay_rate(self):
