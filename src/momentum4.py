@@ -6,6 +6,11 @@ class Momentum4:
         self.m = m
 
     @classmethod
+    def from_cartesian(cls, e, px, py, pz, m):
+        p = np.array([e, px, py, pz])
+        return cls(p, m)
+        
+    @classmethod
     def from_polar(cls, e, c_theta, phi, m):
         p = np.array([e, np.sqrt(e**2 - m**2)*np.sqrt(1 - c_theta**2)*np.cos(phi),
             np.sqrt(e**2 - m**2)*np.sqrt(1 - c_theta**2)*np.sin(phi), np.sqrt(e**2 - m**2)*c_theta])
