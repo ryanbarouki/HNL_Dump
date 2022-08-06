@@ -76,10 +76,6 @@ class HNL(Particle):
         else:
             raise Exception("Invalid fermion type: enter 'up' or 'down' or 'nu")
         
-        # sqrt_fac = np.sqrt(1-4*x**2)
-        # L = np.log((1 - 3*x**2 - (1-x**2)*sqrt_fac)/(x**2*(1 + sqrt_fac)))
-        # fac1 = (1-14*x**2 - 2*x**4 - 12*x**6)*np.sqrt(1-4*x**2) + 12*x**4*(x**4-1)*L
-        # fac2 = x**2*(2 + 10*x**2 - 12*x**4)*sqrt_fac + 6*x**4*(1 - 2*x**2 + 2*x**4)*L
         return pre_fac*(c1f)
 
     def __decay_rate_to_pion(self):
