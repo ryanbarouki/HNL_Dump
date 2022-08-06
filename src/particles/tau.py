@@ -2,8 +2,8 @@ import numpy as np
 from .hnl import HNL
 from .particle import Particle
 from .pion import Pion
-from particle_masses import *
-from utils import generate_samples, e_cos_theta_to_momentum4, get_two_body_momenta
+from ..particle_masses import *
+from ..utils import generate_samples, e_cos_theta_to_momentum4, get_two_body_momenta
 from .tau_decay_modes import TauDecayModes
 
 class Tau(Particle):

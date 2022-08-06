@@ -1,10 +1,10 @@
 import numpy as np
-from fundamental_constants import *
-from mixing_type import MixingType
-from particle_masses import *
-from utils import generate_samples, allowed_e1_e2_three_body_decays, get_lepton_momenta_lab_frame
-from particles.electron import Electron
-from particles.muon import Muon
+from ..fundamental_constants import *
+from ..mixing_type import MixingType
+from ..particle_masses import *
+from ..utils import generate_samples, allowed_e1_e2_three_body_decays, get_lepton_momenta_lab_frame
+from ..particles.electron import Electron
+from ..particles.muon import Muon
 
 class ElectronMuon:
     def __init__(self, beam, parent) -> None:

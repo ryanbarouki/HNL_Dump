@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
 from mpl_toolkits.mplot3d import Axes3D
-from momentum4 import Momentum4
-from logger import Logger
-from experimental_constants import DETECTOR_OPENING_ANGLE
+from .momentum4 import Momentum4
+from .logger import Logger
+from .experimental_constants import DETECTOR_OPENING_ANGLE
 
 plt.style.use('ja')
 
@@ -47,7 +47,7 @@ def PLOT_ENERGY_ANGLE(momenta, range, filename, detector_cut=False):
     if detector_cut:
         plt.plot(samples[:,0], np.linspace(DETECTOR_OPENING_ANGLE, DETECTOR_OPENING_ANGLE, len(samples[:,0])), 'k')
     dirname = os.path.dirname(os.path.abspath(__file__))
-    plt.savefig(os.path.join(dirname, f"recent_graphs/{filename}.png"), dpi=250)
+    plt.savefig(os.path.join(dirname, f"../recent_graphs/{filename}.png"), dpi=250)
 
 def allowed_e1_e2_three_body_decays(e1, e2, e_parent, m1, m2, m3):
     x = e_parent**2 + m1**2 + m2**2 - m3**2

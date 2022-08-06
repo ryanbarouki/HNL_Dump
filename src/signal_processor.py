@@ -1,14 +1,14 @@
 import numpy as np
-from particles.tau_decay_modes import TauDecayModes
-from mixing_type import MixingType
-from particles.hnl import HNL
-from particles.tau import Tau
-from particles.DMeson import DMeson
-from particles.DsMeson import DsMeson 
-import branching_ratios as BR
-import cross_sections as CS
-from logger import Logger
-from experimental_constants import OBSERVED_EVENTS, ELECTRON_NU_MASSLESS_FLUX
+from .particles.tau_decay_modes import TauDecayModes
+from .mixing_type import MixingType
+from .particles.hnl import HNL
+from .particles.tau import Tau
+from .particles.DMeson import DMeson
+from .particles.DsMeson import DsMeson 
+import src.branching_ratios as BR
+import src.cross_sections as CS
+from .logger import Logger
+from .experimental_constants import OBSERVED_EVENTS, ELECTRON_NU_MASSLESS_FLUX
 
 class SignalProcessor:
     def __init__(self, beam) -> None:

@@ -1,10 +1,10 @@
 import numpy as np
-from fundamental_constants import *
-from mixing_type import MixingType
-from utils import PLOT_ENERGY_ANGLE, generate_samples, allowed_e1_e2_three_body_decays, get_lepton_momenta_lab_frame
-from particle_masses import *
-from particles.electron import Electron
-from decay_type import DecayType
+from ..fundamental_constants import *
+from ..mixing_type import MixingType
+from ..utils import PLOT_ENERGY_ANGLE, generate_samples, allowed_e1_e2_three_body_decays, get_lepton_momenta_lab_frame
+from ..particle_masses import *
+from ..particles.electron import Electron
+from ..decay_type import DecayType
 # NOTE this is only a parameter to compare with previous work which only considered the CC decay channels
 # so this could be removed entirely and treated in full
 DECAY_TYPE = DecayType.CCNC

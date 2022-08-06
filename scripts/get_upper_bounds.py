@@ -1,12 +1,19 @@
 #!/usr/local/bin/python3
+
+# --- Needed to tell python about the package in ../src
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(Path(__file__).parent.absolute()).parent.absolute()))
+# ---
+
 import numpy as np
 import argparse
 import matplotlib.pyplot as plt
-from beam import BeamExperiment
-from mixing_type import MixingType
+from src.beam import BeamExperiment
+from src.mixing_type import MixingType
 import time
-from signal_processor import SignalProcessor
-from logger import Logger
+from src.signal_processor import SignalProcessor
+from src.logger import Logger
 
 def main():
     hnl_masses, mass_range, num_samples, debug, mixing_type, plot, save = parse_arguments()

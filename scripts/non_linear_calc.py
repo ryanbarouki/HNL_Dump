@@ -1,12 +1,19 @@
 #!/usr/local/bin/python3
+
+# --- Needed to tell python about the package in ../src
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(Path(__file__).parent.absolute()).parent.absolute()))
+# ---
+
 import argparse
 from cmath import inf
 import numpy as np
 import matplotlib.pyplot as plt
-from beam import BeamExperiment
-from mixing_type import MixingType
-from signal_processor import SignalProcessor
-from logger import Logger
+from src.beam import BeamExperiment
+from src.mixing_type import MixingType
+from src.signal_processor import SignalProcessor
+from src.logger import Logger
 
 def total_decays_less_than_observed(hnl_mass, mixing_squared, num_samples, mixing_type):
     beam = BeamExperiment(mixing_type=mixing_type, num_samples=num_samples).with_mixing(mixing_squared)

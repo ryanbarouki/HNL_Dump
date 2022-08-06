@@ -3,9 +3,9 @@ import numpy as np
 from .particle import Particle
 from .hnl import HNL
 from .electron import Electron
-from mixing_type import MixingType
-from particle_masses import *
-from utils import get_two_body_momenta, DEBUG_AVERAGE_MOMENTUM, DEBUG_PLOT_MOMENTA, PLOT_ENERGY_ANGLE
+from ..mixing_type import MixingType
+from ..particle_masses import *
+from ..utils import get_two_body_momenta, DEBUG_AVERAGE_MOMENTUM, DEBUG_PLOT_MOMENTA, PLOT_ENERGY_ANGLE
 
 class DMeson(Particle):
     """D+/- meson"""

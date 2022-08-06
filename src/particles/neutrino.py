@@ -1,5 +1,5 @@
 from .particle import Particle
-from particle_masses import *
+from ..particle_masses import *
 
 class Neutrino(Particle):
     """Massless neutrino"""

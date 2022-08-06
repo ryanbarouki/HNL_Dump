@@ -1,12 +1,12 @@
 import numpy as np
-from experimental_constants import *
-from momentum4 import Momentum4
-from particles.DsMeson import DsMeson
-from particles.DMeson import DMeson
-from particle_masses import *
-from utils import generate_samples, e_cos_theta_to_momentum4
-from mixing_type import MixingType
-from logger import Logger
+from .experimental_constants import *
+from .momentum4 import Momentum4
+from .particles.DsMeson import DsMeson
+from .particles.DMeson import DMeson
+from .particle_masses import *
+from .utils import generate_samples, e_cos_theta_to_momentum4
+from .mixing_type import MixingType
+from .logger import Logger
 class BeamExperiment:
     def __init__(self, mixing_type, num_samples):
         self.s = NUCLEON_MASS*(2*BEAM_ENERGY + NUCLEON_MASS)

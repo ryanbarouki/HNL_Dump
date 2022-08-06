@@ -1,12 +1,12 @@
 from .neutrino import Neutrino
-from particle_masses import *
-from utils import get_two_body_momenta
+from ..particle_masses import *
+from ..utils import get_two_body_momenta
 from .particle import Particle
 from .electron import Electron
 from .tau import Tau
 from .hnl import HNL
-from mixing_type import MixingType
-from utils import get_two_body_momenta
+from ..mixing_type import MixingType
+from ..utils import get_two_body_momenta
 
 class DsMeson(Particle):
     def __init__(self, beam=None, parent=None, momenta=[]):

@@ -1,6 +1,6 @@
 import numpy as np
-from particle_masses import *
-from fundamental_constants import GF
+from .particle_masses import *
+from .fundamental_constants import GF
 
 D_TO_E_NUE_X = 16.07/100 # +/- 0.30%
 D_TO_MU_NUMU_X = 17.6/100 # +/- 3.2%

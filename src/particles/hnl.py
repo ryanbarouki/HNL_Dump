@@ -1,15 +1,15 @@
 
 import numpy as np
-from mixing_type import MixingType
-from particle_masses import *
-from utils import DEBUG_AVERAGE_MOMENTUM
+from ..mixing_type import MixingType
+from ..particle_masses import *
+from ..utils import DEBUG_AVERAGE_MOMENTUM
 from .particle import Particle
-from fundamental_constants import *
-from logger import Logger
-from hnl_decay_channels.e_pair import ElectronPair
-from hnl_decay_channels.e_mu import ElectronMuon
-from hnl_decay_channels.e_pi import ElectronPion
-from hnl_decay_channels.mu_pair import MuonPair
+from ..fundamental_constants import *
+from ..logger import Logger
+from ..hnl_decay_channels.e_pair import ElectronPair
+from ..hnl_decay_channels.e_mu import ElectronMuon
+from ..hnl_decay_channels.e_pi import ElectronPion
+from ..hnl_decay_channels.mu_pair import MuonPair
 import scipy.integrate as integrate
 
 def I(xu, xd, xl):

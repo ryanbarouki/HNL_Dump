@@ -1,10 +1,10 @@
 import numpy as np
-from fundamental_constants import *
-from mixing_type import MixingType
-from particle_masses import *
-from particles.electron import Electron
-from particles.pion import Pion
-from utils import get_two_body_momenta
+from ..fundamental_constants import *
+from ..mixing_type import MixingType
+from ..particle_masses import *
+from ..particles.electron import Electron
+from ..particles.pion import Pion
+from ..utils import get_two_body_momenta
 
 class ElectronPion:
     def __init__(self, beam, parent) -> None:

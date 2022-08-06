@@ -1,8 +1,8 @@
 import numpy as np
-from fundamental_constants import *
-from particles.muon import Muon
-from particle_masses import *
-from utils import generate_samples, get_lepton_momenta_lab_frame, allowed_e1_e2_three_body_decays
+from ..fundamental_constants import *
+from ..particles.muon import Muon
+from ..particle_masses import *
+from ..utils import generate_samples, get_lepton_momenta_lab_frame, allowed_e1_e2_three_body_decays
 
 class MuonPair:
     def __init__(self, beam, parent) -> None:
