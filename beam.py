@@ -1,8 +1,11 @@
+from tokenize import Number
 import numpy as np
+import pyhepmc as hep
 from experimental_constants import *
 from momentum4 import Momentum4
 from particles.DsMeson import DsMeson
 from particles.DMeson import DMeson
+from particles.BMeson import BMeson
 from particle_masses import *
 from utils import generate_samples, e_cos_theta_to_momentum4
 from mixing_type import MixingType
@@ -32,6 +35,7 @@ class BeamExperiment:
         return self
 
     def start_dump(self, hnl_mass):
+        self.__B_meson_channel(hnl_mass)
         if self.mixing_type == MixingType.electron:
             self.__D_meson_channel(hnl_mass)
             self.__Ds_meson_channel(hnl_mass)
@@ -74,6 +78,27 @@ class BeamExperiment:
         Ds_meson = DsMeson(beam=self, momenta=momentum4_samples)
         self.children.append(Ds_meson)
         Ds_meson.decay(hnl_mass)  
+
+    def __B_meson_channel(self, hnl_mass):
+        four_momenta = self.__parse_hepmc_four_momenta('bMesons.hepmc')
+        B_meson = BMeson(beam=self, momenta=four_momenta)
+        self.children.append(B_meson)
+        B_meson.decay(hnl_mass)
+
+    def __parse_hepmc_four_momenta(self, filename):
+        four_momenta = []
+        with open(filename) as bMesons:
+            for line in bMesons:
+                if line[0] == "P":
+                    code, \
+                    particleNum, \
+                    particleId, \
+                    px, py, pz, e, m, \
+                    *rest = line.strip().split(" ")
+                    momentum4 = Momentum4.from_cartesian(float(e), float(px), float(py), float(pz), float(m)) 
+                    four_momenta.append(momentum4)
+        return four_momenta
+        
     
     def find_instances_of_type(self, type, current=None, instances=None):
         if current == None:
