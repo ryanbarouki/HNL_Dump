@@ -4,6 +4,7 @@ from .momentum4 import Momentum4
 from .particles.DsMeson import DsMeson
 from .particles.DMeson import DMeson
 from .particles.BMeson import BMeson
+from .particles.B0Meson import B0Meson
 from .particle_masses import *
 from .utils import generate_samples, e_cos_theta_to_momentum4
 from .mixing_type import MixingType
@@ -78,23 +79,28 @@ class BeamExperiment:
         Ds_meson.decay(hnl_mass)  
 
     def __B_meson_channel(self, hnl_mass):
-        four_momenta = self.__parse_hepmc_four_momenta('src/hepmc_input/bMesons.hepmc')
-        B_meson = BMeson(beam=self, momenta=four_momenta)
-        self.children.append(B_meson)
-        B_meson.decay(hnl_mass)
+        four_momenta_b0 = self.__parse_hepmc_four_momenta('src/hepmc_input/bMesons.hepmc', pid='511')
+        four_momenta_b_plus = self.__parse_hepmc_four_momenta('src/hepmc_input/bMesons.hepmc', pid='521')
+        B0_meson = B0Meson(beam=self, momenta=four_momenta_b0)
+        B_plus_meson = BMeson(beam=self, momenta=four_momenta_b_plus)
+        self.children.append(B0_meson)
+        self.children.append(B_plus_meson)
+        B0_meson.decay(hnl_mass)
+        B_plus_meson.decay(hnl_mass)
 
-    def __parse_hepmc_four_momenta(self, filename):
+    def __parse_hepmc_four_momenta(self, filename, pid):
         four_momenta = []
         with open(filename) as bMesons:
             for line in bMesons:
-                if line[0] == "P":
-                    code, \
+                code, *other = line.strip().split(" ")
+                if code == "P":
                     particleNum, \
                     particleId, \
                     px, py, pz, e, m, \
-                    *rest = line.strip().split(" ")
-                    momentum4 = Momentum4.from_cartesian(float(e), float(px), float(py), float(pz), float(m)) 
-                    four_momenta.append(momentum4)
+                    *rest = other
+                    if particleId == pid:
+                        momentum4 = Momentum4.from_cartesian(float(e), float(px), float(py), float(pz), float(m)) 
+                        four_momenta.append(momentum4)
         return four_momenta
         
     
