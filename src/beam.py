@@ -9,24 +9,30 @@ from .particle_masses import *
 from .utils import generate_samples, e_cos_theta_to_momentum4
 from .mixing_type import MixingType
 from .logger import Logger
+from .experimental_constants import get_experimental_constants
+
 class BeamExperiment:
-    def __init__(self, mixing_type, num_samples):
-        self.s = NUCLEON_MASS*(2*BEAM_ENERGY + NUCLEON_MASS)
-        self.beam_momentum = Momentum4.from_polar(BEAM_ENERGY + NUCLEON_MASS, 1, 0, np.sqrt(self.s))
-        self.beta_cm = BEAM_ENERGY/(BEAM_ENERGY + NUCLEON_MASS)
-        self.gamma_cm = (BEAM_ENERGY + NUCLEON_MASS)/np.sqrt(self.s)
+    def __init__(self, mixing_type, experiment, num_samples):
+        self.BEAM_ENERGY = get_experimental_constants(experiment)[7]
+        self.NUCLEON_MASS = get_experimental_constants(experiment)[8]
+        self.s = self.NUCLEON_MASS*(2*self.BEAM_ENERGY + self.NUCLEON_MASS)
+        self.beam_momentum = Momentum4.from_polar(self.BEAM_ENERGY + self.NUCLEON_MASS, 1, 0, np.sqrt(self.s))
+        self.beta_cm = self.BEAM_ENERGY/(self.BEAM_ENERGY + self.NUCLEON_MASS)
+        self.gamma_cm = (self.BEAM_ENERGY + self.NUCLEON_MASS)/np.sqrt(self.s)
         self.children = []
-        self.max_opening_angle = DETECTOR_OPENING_ANGLE
-        self.detector_length = DETECTOR_LENGTH
-        self.detector_distance = DETECTOR_DISTANCE
+        self.max_opening_angle = get_experimental_constants(experiment)[0]
+        self.detector_length = get_experimental_constants(experiment)[1]
+        self.detector_distance = get_experimental_constants(experiment)[2]
         self.linear_regime = True
         self.mixing_squared = 1
         self.mixing_type = mixing_type
         self.num_samples = num_samples
+        self.OBSERVED_EVENTS = get_experimental_constants(experiment)[6]
+        self.ELECTRON_NU_MASSLESS_FLUX = get_experimental_constants(experiment)[5]
         if mixing_type == MixingType.electron:
-            self.channels = ELECTRON_HNL_CHANNELS
+            self.channels = get_experimental_constants(experiment)[3]
         elif mixing_type == MixingType.tau:
-            self.channels = TAU_HNL_CHANNELS
+            self.channels = get_experimental_constants(experiment)[4]
     
     def with_mixing(self, mixing_squared):
         self.linear_regime = False

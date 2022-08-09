@@ -6,7 +6,9 @@ from cycler import cycler
 from mpl_toolkits.mplot3d import Axes3D
 from .momentum4 import Momentum4
 from .logger import Logger
-from .experimental_constants import DETECTOR_OPENING_ANGLE
+from .experimental_constants import get_experimental_constants
+
+
 
 plt.style.use('ja')
 
@@ -45,7 +47,7 @@ def PLOT_ENERGY_ANGLE(momenta, range, filename, detector_cut=False):
     plt.gca().set_yticklabels(['${:.2f}$'.format(x) for x in y_values])
 
     if detector_cut:
-        plt.plot(samples[:,0], np.linspace(DETECTOR_OPENING_ANGLE, DETECTOR_OPENING_ANGLE, len(samples[:,0])), 'k')
+        plt.plot(samples[:,0], np.linspace(1e-3, 1e-3, len(samples[:,0])), 'k')
     dirname = os.path.dirname(os.path.abspath(__file__))
     plt.savefig(os.path.join(dirname, f"../recent_graphs/{filename}.png"), dpi=250)
 

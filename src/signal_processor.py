@@ -10,7 +10,6 @@ import src.branching_ratios as BR
 import src.cross_sections as CS
 import src.particle_masses as PM
 from .logger import Logger
-from .experimental_constants import OBSERVED_EVENTS, ELECTRON_NU_MASSLESS_FLUX
 
 class SignalProcessor:
     def __init__(self, beam) -> None:
@@ -23,9 +22,9 @@ class SignalProcessor:
 
         total_decays = self.get_total_decays(hnls)
         print(total_decays)
-        print(OBSERVED_EVENTS)
+        print(self.beam.OBSERVED_EVENTS)
 
-        upper_bound_squared = np.sqrt(OBSERVED_EVENTS/total_decays)
+        upper_bound_squared = np.sqrt(self.beam.OBSERVED_EVENTS/total_decays)
         return upper_bound_squared
 
     def get_total_decays(self, hnls):
@@ -48,12 +47,12 @@ class SignalProcessor:
             logger.log(f"Acceptance: {acceptance}")
 
             if self.beam.mixing_type == MixingType.electron:
-                # if isinstance(hnl.parent, DMeson):
-                #     total_flux = self.__get_normalised_hnl_flux_from_DpDm_mesons(hnl_mass=hnl.m)
-                #     logger.log("Flux norm (D): {:e}".format(total_flux))
-                # elif isinstance(hnl.parent, DsMeson):
-                #     total_flux = self.__get_normalised_electron_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
-                #     logger.log("Flux norm (Ds): {:e}".format(total_flux))
+                if isinstance(hnl.parent, DMeson):
+                    total_flux = self.__get_normalised_hnl_flux_from_DpDm_mesons(hnl_mass=hnl.m)
+                    logger.log("Flux norm (D): {:e}".format(total_flux))
+                elif isinstance(hnl.parent, DsMeson):
+                    total_flux = self.__get_normalised_electron_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
+                    logger.log("Flux norm (Ds): {:e}".format(total_flux))
                 if isinstance(hnl.parent, BMeson):
                     total_flux = self.__get_normalised_hnl_flux_from_Bpm_mesons(hnl_mass=hnl.m)
                     logger.log("Flux norm (B): {:e}".format(total_flux))
@@ -71,6 +70,8 @@ class SignalProcessor:
                 elif isinstance(hnl.parent, BMeson):
                     total_flux = self.__get_normalised_hnl_flux_from_Bpm_mesons(hnl_mass=hnl.m)
                     logger.log("Flux norm (B): {:e}".format(total_flux))
+            if acceptance == 0:
+                raise Exception("Zero acceptance")
             total_decays += total_flux*prop_factor*efficiency*acceptance
         return total_decays
 
@@ -81,23 +82,23 @@ class SignalProcessor:
 
         total_decays = self.get_total_decays(hnls)
         print(f"Mixing: {self.beam.mixing_squared}, Total decays: {total_decays}")
-        return total_decays - OBSERVED_EVENTS
+        return total_decays - self.beam.OBSERVED_EVENTS
 
     def __get_normalised_hnl_flux_from_DpDm_mesons(self, hnl_mass):
-        return ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DPDM_X*BR.D_TO_E_HNL(hnl_mass, self.beam.mixing_squared))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
+        return self.beam.ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DPDM_X*BR.D_TO_E_HNL(hnl_mass, self.beam.mixing_squared))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
 
     def __get_normalised_tau_hnl_flux_from_Ds_mesons(self, hnl_mass):
-        return ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DSDS_X*BR.DS_TO_TAU_HNL(hnl_mass, self.beam.mixing_squared))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
+        return self.beam.ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DSDS_X*BR.DS_TO_TAU_HNL(hnl_mass, self.beam.mixing_squared))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
 
     def __get_normalised_electron_hnl_flux_from_Ds_mesons(self, hnl_mass):
-        return ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DSDS_X*BR.DS_TO_ELECTRON_HNL(hnl_mass, self.beam.mixing_squared))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
+        return self.beam.ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DSDS_X*BR.DS_TO_ELECTRON_HNL(hnl_mass, self.beam.mixing_squared))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
 
     def __get_normalised_hnl_flux_from_tau_two_body(self, hnl_mass):
-        return ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DSDS_X*BR.DS_TO_TAU_X*BR.TAU_TO_PI_HNL(hnl_mass, self.beam.mixing_squared))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
+        return self.beam.ELECTRON_NU_MASSLESS_FLUX*(CS.P_TO_DSDS_X*BR.DS_TO_TAU_X*BR.TAU_TO_PI_HNL(hnl_mass, self.beam.mixing_squared))/(CS.P_TO_DPDM_X*BR.D_TO_E_NUE_X + CS.P_TO_D0D0_X*BR.D0_TO_E_NUE_X)
 
     def __get_normalised_hnl_flux_from_tau_three_body(self, hnl_mass):
         DS_TO_D_FLUX_RATIO = 0.2
-        D_FLUX = ELECTRON_NU_MASSLESS_FLUX/(BR.D_TO_E_NUE_X + 2*BR.D0_TO_E_NUE_X)
+        D_FLUX = self.beam.ELECTRON_NU_MASSLESS_FLUX/(BR.D_TO_E_NUE_X + 2*BR.D0_TO_E_NUE_X)
         DS_FLUX = DS_TO_D_FLUX_RATIO*D_FLUX
         hnl_flux = DS_FLUX*BR.DS_TO_TAU_X*BR.TAU_TO_HNL_L_NU_L(hnl_mass, self.beam.mixing_squared)
         return hnl_flux

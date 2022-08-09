@@ -14,9 +14,10 @@ from src.mixing_type import MixingType
 import time
 from src.signal_processor import SignalProcessor
 from src.logger import Logger
+from src.experiment import Experiment
 
 def main():
-    hnl_masses, mass_range, num_samples, debug, mixing_type, plot, save = parse_arguments()
+    hnl_masses, mass_range, num_samples, debug, mixing_type, plot, save, experiment = parse_arguments()
     file = open(f"./upper_bound_data/upper_bounds_{mixing_type}.csv", "a")
     logger = Logger(debug=debug)
     upper_bounds = []
@@ -28,7 +29,7 @@ def main():
     for hnl_mass in hnl_masses:
         start = time.time()
 
-        beam = BeamExperiment(mixing_type=mixing_type, num_samples=num_samples)
+        beam = BeamExperiment(mixing_type=mixing_type, experiment=experiment, num_samples=num_samples)
 
         beam.start_dump(hnl_mass)
         upper_bound_squared = SignalProcessor(beam).get_upper_bound()
@@ -63,6 +64,7 @@ def parse_arguments():
     parser.add_argument('--debug', action='store_true', help="Print debug logs")
     parser.add_argument('--plot', action='store_true', help="Plot upper bounds")
     parser.add_argument('--save', action='store_true', help="Save data to file")
+    parser.add_argument('--exp', type=str, choices=['BEBC', 'NuTeV'], help="valid values: 'BEBC' or 'NuTeV'", default = 'BEBC')
     args = parser.parse_args()
 
     hnl_masses = args.m
@@ -72,7 +74,8 @@ def parse_arguments():
     plot = args.plot
     save = args.save
     mixing_type = MixingType[args.mixing]
-    return hnl_masses,mass_range,num_samples,debug,mixing_type,plot,save
+    experiment = Experiment[args.exp]
+    return hnl_masses,mass_range,num_samples,debug,mixing_type,plot,save,experiment
 
 if __name__ == "__main__":
     main()
