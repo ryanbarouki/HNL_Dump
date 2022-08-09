@@ -26,7 +26,7 @@ def get_experimental_constants(experiment):
         DETECTOR_DISTANCE = 1400 * 5.08e15 # GeV^-1
         ELECTRON_HNL_CHANNELS = ["mu+mu+nu"]
         TAU_HNL_CHANNELS = ["mu+mu+nu"] 
-        ELECTRON_NU_MASSLESS_FLUX = 4.1e-4 * 2.72e18
+        ELECTRON_NU_MASSLESS_FLUX = 4.1e-4 * 2.54e18
         OBSERVED_EVENTS = 2.3 # 2.3
         BEAM_ENERGY = 800 #GeV
         NUCLEON_MASS = 1. #GeV
