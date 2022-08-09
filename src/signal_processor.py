@@ -105,7 +105,7 @@ class SignalProcessor:
     
     def __get_normalised_hnl_flux_from_Bpm_mesons(self, hnl_mass):
 #        B_FLUX = 2*POT*(1.6e-7)
-        B_FLUX = 2*2.54e18*1.6e-7*10
+        B_FLUX = 2*self.beam.POT*self.beam.bMesonFraction
         if self.beam.mixing_type == MixingType.electron:
             hnl_flux = B_FLUX*BR.B_TO_ELL_HNL(hnl_mass, self.beam.mixing_squared, PM.ELECTRON_MASS)*(PM.ELECTRON_MASS/PM.TAU_MASS)**2
             return hnl_flux

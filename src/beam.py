@@ -23,6 +23,8 @@ class BeamExperiment:
         self.max_opening_angle = get_experimental_constants(experiment)[0]
         self.detector_length = get_experimental_constants(experiment)[1]
         self.detector_distance = get_experimental_constants(experiment)[2]
+        self.POT = get_experimental_constants(experiment)[9]
+        self.bMesonFraction = get_experimental_constants(experiment)[10]
         self.linear_regime = True
         self.mixing_squared = 1
         self.mixing_type = mixing_type
