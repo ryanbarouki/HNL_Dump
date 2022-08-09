@@ -1,4 +1,5 @@
 .vscode/
+.spyproject/
 .DS_Store
 */.DS_Store
 __pycache__/
