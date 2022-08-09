@@ -1,6 +1,7 @@
 """All values are given in GeV"""
 TAU_MASS = 1.78
 D_MASS = 1.87
+B_MASS = 5.279
 DS_MASS = 1.97
 B_MASS = 5.279 # TODO check this
 ELECTRON_MASS = 5.11e-4

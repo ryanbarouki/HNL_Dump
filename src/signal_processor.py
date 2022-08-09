@@ -5,8 +5,10 @@ from .particles.hnl import HNL
 from .particles.tau import Tau
 from .particles.DMeson import DMeson
 from .particles.DsMeson import DsMeson 
+from .particles.BMeson import BMeson
 import src.branching_ratios as BR
 import src.cross_sections as CS
+import src.particle_masses as PM
 from .logger import Logger
 from .experimental_constants import OBSERVED_EVENTS, ELECTRON_NU_MASSLESS_FLUX
 
@@ -20,6 +22,8 @@ class SignalProcessor:
             raise Exception("No HNLs!")
 
         total_decays = self.get_total_decays(hnls)
+        print(total_decays)
+        print(OBSERVED_EVENTS)
 
         upper_bound_squared = np.sqrt(OBSERVED_EVENTS/total_decays)
         return upper_bound_squared
@@ -44,12 +48,15 @@ class SignalProcessor:
             logger.log(f"Acceptance: {acceptance}")
 
             if self.beam.mixing_type == MixingType.electron:
-                if isinstance(hnl.parent, DMeson):
-                    total_flux = self.__get_normalised_hnl_flux_from_DpDm_mesons(hnl_mass=hnl.m)
-                    logger.log("Flux norm (D): {:e}".format(total_flux))
-                elif isinstance(hnl.parent, DsMeson):
-                    total_flux = self.__get_normalised_electron_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
-                    logger.log("Flux norm (Ds): {:e}".format(total_flux))
+                # if isinstance(hnl.parent, DMeson):
+                #     total_flux = self.__get_normalised_hnl_flux_from_DpDm_mesons(hnl_mass=hnl.m)
+                #     logger.log("Flux norm (D): {:e}".format(total_flux))
+                # elif isinstance(hnl.parent, DsMeson):
+                #     total_flux = self.__get_normalised_electron_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
+                #     logger.log("Flux norm (Ds): {:e}".format(total_flux))
+                if isinstance(hnl.parent, BMeson):
+                    total_flux = self.__get_normalised_hnl_flux_from_Bpm_mesons(hnl_mass=hnl.m)
+                    logger.log("Flux norm (B): {:e}".format(total_flux))
             elif self.beam.mixing_type == MixingType.tau:
                 if isinstance(hnl.parent, Tau):
                     if hnl.decay_mode == TauDecayModes.hnl_pi:
@@ -61,7 +68,9 @@ class SignalProcessor:
                 elif isinstance(hnl.parent, DsMeson):
                     total_flux = self.__get_normalised_tau_hnl_flux_from_Ds_mesons(hnl_mass=hnl.m)
                     logger.log("Flux norm (Ds): {:e}".format(total_flux))
-
+                elif isinstance(hnl.parent, BMeson):
+                    total_flux = self.__get_normalised_hnl_flux_from_Bpm_mesons(hnl_mass=hnl.m)
+                    logger.log("Flux norm (B): {:e}".format(total_flux))
             total_decays += total_flux*prop_factor*efficiency*acceptance
         return total_decays
 
@@ -92,3 +101,13 @@ class SignalProcessor:
         DS_FLUX = DS_TO_D_FLUX_RATIO*D_FLUX
         hnl_flux = DS_FLUX*BR.DS_TO_TAU_X*BR.TAU_TO_HNL_L_NU_L(hnl_mass, self.beam.mixing_squared)
         return hnl_flux
+    
+    def __get_normalised_hnl_flux_from_Bpm_mesons(self, hnl_mass):
+#        B_FLUX = 2*POT*(1.6e-7)
+        B_FLUX = 2*2.54e18*1.6e-7*10
+        if self.beam.mixing_type == MixingType.electron:
+            hnl_flux = B_FLUX*BR.B_TO_ELL_HNL(hnl_mass, self.beam.mixing_squared, PM.ELECTRON_MASS)*(PM.ELECTRON_MASS/PM.TAU_MASS)**2
+            return hnl_flux
+        if self.beam.mixing_type == MixingType.tau:
+            hnl_flux = B_FLUX*BR.B_TO_ELL_HNL(hnl_mass, self.beam.mixing_squared, PM.TAU_MASS)
+            return hnl_flux

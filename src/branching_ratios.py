@@ -35,6 +35,15 @@ def D_TO_E_HNL(mN, mixing_squared):
     BR_D_TO_E_NUE = 1.5e-8
     return BR_D_TO_E_NUE*np.sqrt(l_til)*h_til*mixing_squared
 
+def B_TO_ELL_HNL(mN, mixing_squared, mEll):
+    x = (mEll/B_MASS)**2
+    y = (mN/B_MASS)**2
+    l_til = l_tilde(x,y)
+    h_til = h_tilde(x, y)
+    BR_B_TO_TAU_NUTAU = 1.09e-4
+    return BR_B_TO_TAU_NUTAU*np.sqrt(l_til)*h_til*mixing_squared
+    
+
 def DS_TO_TAU_HNL(mN, mixing_squared):
     x = (TAU_MASS/DS_MASS)**2
     y = (mN/DS_MASS)**2

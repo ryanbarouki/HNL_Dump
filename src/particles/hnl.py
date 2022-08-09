@@ -25,6 +25,11 @@ class HNL(Particle):
         self.signal = {}
         self.average_propagation_factor = {}
         self.efficiency = {}
+        self.majorana = True
+        self.majFactor = 1
+        if self.majorana == True:
+            self.majFactor = 2;
+
 
         # NOTE add more HNL decay channels here
         self.decay_channels = {
@@ -38,7 +43,7 @@ class HNL(Particle):
     def __average_propagation_factor(self, length_detector, decay_rate):
         factors = []
         for p in self.momenta:
-            factor = length_detector*self.m*decay_rate/p.get_total_momentum()
+            factor = self.majFactor*length_detector*self.m*decay_rate/p.get_total_momentum()
             factors.append(factor)
         return np.average(factors)
 
@@ -46,8 +51,8 @@ class HNL(Particle):
         factors = []
         for p in self.momenta:
             ptot = p.get_total_momentum()
-            factor1 = np.exp(-detector_distance*self.m*total_decay_rate/ptot)
-            factor2 = 1 - np.exp(-detector_length*self.m*total_decay_rate/ptot)
+            factor1 = np.exp(-detector_distance*self.majFactor*self.m*total_decay_rate/ptot)
+            factor2 = 1 - np.exp(-detector_length*self.majFactor*self.m*total_decay_rate/ptot)
             factor = factor1*factor2*(partial_decay_rate/total_decay_rate)
             factors.append(factor)
         return np.average(factors)

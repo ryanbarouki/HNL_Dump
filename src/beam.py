@@ -81,11 +81,11 @@ class BeamExperiment:
     def __B_meson_channel(self, hnl_mass):
         four_momenta_b0 = self.__parse_hepmc_four_momenta('src/hepmc_input/bMesons.hepmc', pid='511')
         four_momenta_b_plus = self.__parse_hepmc_four_momenta('src/hepmc_input/bMesons.hepmc', pid='521')
-        B0_meson = B0Meson(beam=self, momenta=four_momenta_b0)
+#        B0_meson = B0Meson(beam=self, momenta=four_momenta_b0)
         B_plus_meson = BMeson(beam=self, momenta=four_momenta_b_plus)
-        self.children.append(B0_meson)
+#        self.children.append(B0_meson)
         self.children.append(B_plus_meson)
-        B0_meson.decay(hnl_mass)
+#        B0_meson.decay(hnl_mass)
         B_plus_meson.decay(hnl_mass)
 
     def __parse_hepmc_four_momenta(self, filename, pid):
