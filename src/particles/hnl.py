@@ -25,7 +25,7 @@ class HNL(Particle):
         self.signal = {}
         self.average_propagation_factor = {}
         self.efficiency = {}
-        self.majorana = False
+        self.majorana = True
         self.majFactor = 1
         if self.majorana == True:
             self.majFactor = 2;
@@ -108,6 +108,7 @@ class HNL(Particle):
 
     def __get_prop_factor_for_regime(self, partial_decay):
         if self.beam.linear_regime:
+            print("detectorLength:", self.beam.detector_length)
             return self.__average_propagation_factor(self.beam.detector_length, partial_decay)
         else:
             total_decay = self.__total_decay_rate()

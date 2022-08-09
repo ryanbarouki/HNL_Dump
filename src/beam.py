@@ -21,7 +21,9 @@ class BeamExperiment:
         self.gamma_cm = (self.BEAM_ENERGY + self.NUCLEON_MASS)/np.sqrt(self.s)
         self.children = []
         self.max_opening_angle = get_experimental_constants(experiment)[0]
+        print(self.max_opening_angle)
         self.detector_length = get_experimental_constants(experiment)[1]
+        print(self.detector_length)
         self.detector_distance = get_experimental_constants(experiment)[2]
         self.POT = get_experimental_constants(experiment)[9]
         self.bMesonFraction = get_experimental_constants(experiment)[10]
