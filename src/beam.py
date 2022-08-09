@@ -29,6 +29,7 @@ class BeamExperiment:
         self.mixing_squared = 1
         self.mixing_type = mixing_type
         self.num_samples = num_samples
+        print(self.BEAM_ENERGY)
         self.OBSERVED_EVENTS = get_experimental_constants(experiment)[6]
         self.ELECTRON_NU_MASSLESS_FLUX = get_experimental_constants(experiment)[5]
         if mixing_type == MixingType.electron:

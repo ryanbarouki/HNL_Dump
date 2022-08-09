@@ -25,7 +25,7 @@ class HNL(Particle):
         self.signal = {}
         self.average_propagation_factor = {}
         self.efficiency = {}
-        self.majorana = True
+        self.majorana = False
         self.majFactor = 1
         if self.majorana == True:
             self.majFactor = 2;
