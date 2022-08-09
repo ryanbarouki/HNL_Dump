@@ -21,9 +21,7 @@ class BeamExperiment:
         self.gamma_cm = (self.BEAM_ENERGY + self.NUCLEON_MASS)/np.sqrt(self.s)
         self.children = []
         self.max_opening_angle = get_experimental_constants(experiment)[0]
-        print(self.max_opening_angle)
         self.detector_length = get_experimental_constants(experiment)[1]
-        print(self.detector_length)
         self.detector_distance = get_experimental_constants(experiment)[2]
         self.POT = get_experimental_constants(experiment)[9]
         self.bMesonFraction = get_experimental_constants(experiment)[10]
@@ -31,7 +29,6 @@ class BeamExperiment:
         self.mixing_squared = 1
         self.mixing_type = mixing_type
         self.num_samples = num_samples
-        print(self.BEAM_ENERGY)
         self.OBSERVED_EVENTS = get_experimental_constants(experiment)[6]
         self.ELECTRON_NU_MASSLESS_FLUX = get_experimental_constants(experiment)[5]
         if mixing_type == MixingType.electron:

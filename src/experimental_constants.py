@@ -1,10 +1,5 @@
 from src.experiment import Experiment
 
-
-# class ExperimentalConstants:
-#     def __init__(self):
-#         self.DETECTOR_OPENING_ANGLE,   = get_experimental_constants(experiment)
-    
 def get_experimental_constants(experiment):
 
     if experiment == Experiment.BEBC: 
@@ -18,7 +13,7 @@ def get_experimental_constants(experiment):
         BEAM_ENERGY = 400 #GeV
         NUCLEON_MASS = 1. #GeV
         POT = 2.72e18
-        bMesonFraction = 1.6e-7
+        B_MESON_FRACTION = 1.6e-7
         
     elif experiment == Experiment.NuTeV:
         DETECTOR_OPENING_ANGLE = 1.69/1400 #2.52/404 
@@ -31,7 +26,7 @@ def get_experimental_constants(experiment):
         BEAM_ENERGY = 800 #GeV
         NUCLEON_MASS = 1. #GeV
         POT = 2.54e18
-        bMesonFraction = 1.6e-6
+        B_MESON_FRACTION = 1.6e-6
         
     elif experiment == 3: # SHiP
         DETECTOR_OPENING_ANGLE = 4/50 #2.52/404 
@@ -45,4 +40,7 @@ def get_experimental_constants(experiment):
         NUCLEON_MASS = 1. #GeV
         POT = 2.54e18
             
-    return [DETECTOR_OPENING_ANGLE, DETECTOR_LENGTH, DETECTOR_DISTANCE, ELECTRON_HNL_CHANNELS, TAU_HNL_CHANNELS, ELECTRON_NU_MASSLESS_FLUX,OBSERVED_EVENTS,BEAM_ENERGY,NUCLEON_MASS,POT, bMesonFraction ]
+    return (DETECTOR_OPENING_ANGLE, DETECTOR_LENGTH, DETECTOR_DISTANCE, 
+            ELECTRON_HNL_CHANNELS, TAU_HNL_CHANNELS, 
+            ELECTRON_NU_MASSLESS_FLUX,OBSERVED_EVENTS,
+            BEAM_ENERGY,NUCLEON_MASS,POT, B_MESON_FRACTION)

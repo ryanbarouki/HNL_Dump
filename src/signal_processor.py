@@ -21,8 +21,6 @@ class SignalProcessor:
             raise Exception("No HNLs!")
 
         total_decays = self.get_total_decays(hnls)
-        print(total_decays)
-        print(self.beam.OBSERVED_EVENTS)
 
         upper_bound_squared = np.sqrt(self.beam.OBSERVED_EVENTS/total_decays)
         return upper_bound_squared
