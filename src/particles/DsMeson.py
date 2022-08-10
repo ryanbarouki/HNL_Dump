@@ -47,7 +47,7 @@ class DsMeson(Particle):
 
     def decay(self, hnl_mass):
         # D -> N + lepton (electron, muon, tau)
-        if self.beam.mixing_type == MixingType.electron:
+        if self.beam.mixing_type == MixingType.electron and hnl_mass + ELECTRON_MASS < DS_MASS:
             self.__decay_electron_mixing(hnl_mass)
         elif self.beam.mixing_type == MixingType.tau:
             self.__decay_tau_mixing(hnl_mass)

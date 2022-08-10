@@ -1,5 +1,5 @@
 """All values are given in GeV"""
-TAU_MASS = 1.78
+TAU_MASS = 1.777
 D_MASS = 1.87
 DS_MASS = 1.97
 B_MASS = 5.279 # TODO check this

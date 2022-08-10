@@ -16,21 +16,21 @@ class DMeson(Particle):
         # D -> N + electron (muon but not implemented)
         if self.beam.mixing_type == MixingType.tau:
             return self
-
-        hnl = HNL(hnl_mass, beam=self.beam, parent=self)
-        electron = Electron(parent=self, beam=self.beam)
-
-        # set the kinematics of the children
-        hnl_rest_momenta = get_two_body_momenta(self, hnl, electron, num_samples=self.beam.num_samples)
-
-        hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)
-
-        DEBUG_AVERAGE_MOMENTUM(hnl, "Average HNL momentum")
-        PLOT_ENERGY_ANGLE(hnl.momenta, ((0, 200), (0, 0.08)), filename=f"hnls_from_D_mesons_[{self.beam.mixing_type}]", detector_cut=True)
-
-        hnl.decay()
-
-        self.children.append(hnl)
-        self.children.append(electron)
+        if ELECTRON_MASS + hnl_mass < D_MASS:
+            hnl = HNL(hnl_mass, beam=self.beam, parent=self)
+            electron = Electron(parent=self, beam=self.beam)
+    
+            # set the kinematics of the children
+            hnl_rest_momenta = get_two_body_momenta(self, hnl, electron, num_samples=self.beam.num_samples)
+    
+            hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)
+    
+            DEBUG_AVERAGE_MOMENTUM(hnl, "Average HNL momentum")
+            PLOT_ENERGY_ANGLE(hnl.momenta, ((0, 200), (0, 0.08)), filename=f"hnls_from_D_mesons_[{self.beam.mixing_type}]", detector_cut=True)
+    
+            hnl.decay()
+    
+            self.children.append(hnl)
+            self.children.append(electron)
         
         return self

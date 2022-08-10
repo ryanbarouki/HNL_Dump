@@ -9,7 +9,7 @@ def get_experimental_constants(experiment):
         ELECTRON_HNL_CHANNELS = ["e+pos+nu", "mu+e+nu", "e+pi", "mu+mu+nu"]
         TAU_HNL_CHANNELS = ["e+pos+nu", "mu+mu+nu"] 
         ELECTRON_NU_MASSLESS_FLUX = 4.1e-4 * 2.72e18
-        OBSERVED_EVENTS = 3.5 # 2.3
+        OBSERVED_EVENTS = 2.3 # 2.3
         BEAM_ENERGY = 400 #GeV
         NUCLEON_MASS = 1. #GeV
         POT = 2.72e18
@@ -31,7 +31,7 @@ def get_experimental_constants(experiment):
         POT = 2.54e18
         B_MESON_FRACTION = 1.6e-6
         
-    elif experiment == Experiment.NuTeV: # SHiP
+    elif experiment == Experiment.SHiP: # SHiP
         DETECTOR_OPENING_ANGLE = 4/50 #2.52/404 
         DETECTOR_LENGTH = 50 * 5.08e15 # GeV^-1
         DETECTOR_DISTANCE = 50 * 5.08e15 # GeV^-1
@@ -51,4 +51,4 @@ def get_experimental_constants(experiment):
     return (DETECTOR_OPENING_ANGLE, DETECTOR_LENGTH, DETECTOR_DISTANCE, 
             ELECTRON_HNL_CHANNELS, TAU_HNL_CHANNELS, 
             ELECTRON_NU_MASSLESS_FLUX,OBSERVED_EVENTS,
-            BEAM_ENERGY,NUCLEON_MASS,POT, B_MESON_FRACTION)
+            BEAM_ENERGY,NUCLEON_MASS,POT, B_MESON_FRACTION, muon_e_min, mT_max)

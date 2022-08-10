@@ -22,7 +22,7 @@ mpl.rcParams['axes.prop_cycle'] = cycler(color=['#377eb8', '#ff7f00', '#4daf4a',
 def main():
     mixing_type = MixingType.tau
     upper_bounds = read_csv_file(f"upper_bound_data/upper_bounds_{mixing_type}.csv")
-    upper_bounds = [upper_bounds[i] for i in range(len(upper_bounds)) if i % 5 == 0]
+    upper_bounds = [upper_bounds[i] for i in range(len(upper_bounds)) if i % 1 == 0]
     lower_bounds = read_csv_file(f"lower_bound_data/lower_bounds_{mixing_type}_non_linear.csv")
     charm = np.array(read_csv_file("digitised_data/tau/CHARM.csv"))
     t2k = np.array(read_csv_file("digitised_data/tau/T2K.csv"))
@@ -30,7 +30,9 @@ def main():
     mathusla = np.array(read_csv_file("digitised_data/tau/MATHUSLA.csv"))
     na62 = np.array(read_csv_file("digitised_data/tau/NA62.csv"))
     ship = np.array(read_csv_file("digitised_data/tau/SHiP.csv"))
-
+    argo = np.array(read_csv_file("./digitised_data/tau/Argoneut.csv"))
+    belle = np.array(read_csv_file("./digitised_data/tau/Belle.csv"))
+    
     lower_bounds.sort(key=lambda data: data[0], reverse=True)
     upper_bounds.sort(key=lambda data: data[0])
     lower_bounds = np.array(lower_bounds)
@@ -40,18 +42,18 @@ def main():
     # # ------------------------ Plotting --------------------------------
     dpi = 250
     fig = plt.figure(figsize=(7, 7), dpi=dpi)
-    plt.xlabel(r'$M\, [ \mathrm{GeV}]$')
-    plt.ylabel(r'$|U_{\tau}|^2$')
-    plt.plot(*get_cols(bounds), 'k', label="Our results")
-    plt.plot(*get_cols(delphi), label="DELPHI")
-    plt.plot(*get_cols(charm), label="CHARM")
+    plt.xlabel(r'$m_N\, [ \mathrm{GeV}]$')
+    plt.ylabel(r'$|U_{\tau N}|^2$')
+    plt.plot(*get_cols(bounds), 'k', label="BEBC (reanalysis)")
+    plt.plot(*get_cols(charm), label="CHARM (recast)")
     plt.plot(*get_cols(t2k), label="T2K")
-    plt.plot(*get_cols(na62), '--', dashes=(5,2), label="NA62")
-    plt.plot(*get_cols(ship), '--', dashes=(5,2), label="SHiP")
-    plt.plot(*get_cols(mathusla), '--', dashes=(5,2), label="MATHUSLA")
+    plt.plot(*get_cols(argo), label="ArgoNeuT")
+    plt.plot(*get_cols(belle), label="Belle (recast)")
+    plt.plot(*get_cols(delphi), label="DELPHI")    
     plt.yscale('log')
     plt.legend(fontsize="small")
-    plt.xlim([min(charm[:,0]),3])
+    plt.xlim([min(charm[:,0]),2.75])
+    plt.ylim(1e-7,1e-2)
     dirname = os.path.dirname(os.path.abspath(__file__))
     plt.fill(*get_cols(bounds), color="#ddd")
     # plt.fill(*get_cols(delphi), color="#ddd")
