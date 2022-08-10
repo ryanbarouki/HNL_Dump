@@ -3,13 +3,13 @@ from .hnl import HNL
 from .particle import Particle
 from .pion import Pion
 from ..particle_masses import *
-from ..utils import generate_samples, e_cos_theta_to_momentum4, get_two_body_momenta
+from ..utils import generate_samples, e_cos_theta_to_momentum4, get_two_body_momenta, PLOT_ENERGY_ANGLE_JACOBIAN
 from .tau_decay_modes import TauDecayModes
 
 class Tau(Particle):
     def __init__(self, beam=None, parent=None, momenta=[]):
         super().__init__(TAU_MASS, beam, parent, momenta)
-    
+        self.beam = beam
     def decay(self, hnl_mass):
         if hnl_mass > TAU_MASS:
             return self
@@ -24,8 +24,11 @@ class Tau(Particle):
         hnl_rest_samples = generate_samples(e, cos_theta, dist_func=lambda e, cos: self.diff_decay_to_hnl_nu_lepton(hnl_mass, e, cos), n_samples=self.beam.num_samples)
         hnl_rest_momenta  = e_cos_theta_to_momentum4(hnl_rest_samples, hnl_mass)
         hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)
-        hnl.decay()
+        PLOT_ENERGY_ANGLE_JACOBIAN(hnl.momenta, ((0, 200), (0, 0.5)), filename=f"hnls_from_TAU_[{self.beam.mixing_type}]", detector_cut=False,
+                          horizontal_line=self.beam.max_opening_angle, xLabel = r'$E_N$', yLabel = r'$\theta_N^2 \, \times \, 10^{-3}$')
 
+        hnl.decay()
+        
         if hnl_mass + pion.m < self.m:
             hnl_rest_momenta_two_body = get_two_body_momenta(self, hnl, pion, self.beam.num_samples)
             hnl2body.set_momenta(hnl_rest_momenta_two_body).boost(self.momenta)

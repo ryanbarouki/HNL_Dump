@@ -29,7 +29,7 @@ def DEBUG_PLOT_MOMENTA(particle, range):
     plt.hist2d(samples[:,0], samples[:,1], bins=100, range=range)
     plt.show()
 
-def PLOT_ENERGY_ANGLE(momenta, range, filename, detector_cut=False):
+def PLOT_ENERGY_ANGLE(momenta, range, filename, detector_cut=False, horizontal_line=0, xLabel = r'$E$', yLabel = r'$\theta$'):
     if not Logger().DEBUG:
         return
     samples = []
@@ -38,16 +38,42 @@ def PLOT_ENERGY_ANGLE(momenta, range, filename, detector_cut=False):
         e = momentum.get_energy()
         samples.append([e, th])
     samples = np.array(samples)
-
     fig = plt.figure()
-    plt.xlabel(r'$E\, [ \mathrm{GeV}]$')
-    plt.ylabel(r'$\theta\, [\mathrm{rad}]$')
+    plt.xlabel(xLabel + r'$ \, [ \mathrm{GeV}]$')
+    plt.ylabel(yLabel + r'$\, [\mathrm{rad}]$')
     plt.hist2d(samples[:,0], samples[:,1], bins=100, range=range)
     y_values = plt.gca().get_yticks()
     plt.gca().set_yticklabels(['${:.2f}$'.format(x) for x in y_values])
-
     if detector_cut:
-        plt.plot(samples[:,0], np.linspace(1e-3, 1e-3, len(samples[:,0])), 'k')
+        plt.plot(samples[:,0], np.linspace(DETECTOR_OPENING_ANGLE, DETECTOR_OPENING_ANGLE, len(samples[:,0])), 'k')
+    if horizontal_line != 0:
+        plt.hlines(horizontal_line,range[0][0],range[0][1],ls = '--', color = 'white')
+        plt.text(200,horizontal_line, r'$\mathrm{BEBC} \, \theta_\mathrm{max} $', ha = 'right',
+                 va = 'bottom', color = 'white')
+    dirname = os.path.dirname(os.path.abspath(__file__))
+    plt.savefig(os.path.join(dirname, f"../recent_graphs/{filename}.png"), dpi=250)
+    
+def PLOT_ENERGY_ANGLE_JACOBIAN(momenta, range, filename, detector_cut=False, horizontal_line=0, xLabel = r'$E$', yLabel = r'$\theta$'):
+    if not Logger().DEBUG:
+        return
+    samples = []
+    for momentum in momenta:
+        th = np.arccos(momentum.get_cos_theta())
+        e = momentum.get_energy()
+        samples.append([e, 10**3*th**2])
+    samples = np.array(samples)
+    fig = plt.figure()
+    plt.xlabel(xLabel + r'$ \, [ \mathrm{GeV}]$')
+    plt.ylabel(yLabel + r'$\, [\mathrm{rad}]$')
+    plt.hist2d(samples[:,0], samples[:,1], bins=100, range=range)
+    y_values = plt.gca().get_yticks()
+    plt.gca().set_yticklabels(['${:.2f}$'.format(x) for x in y_values])
+    if detector_cut:
+        plt.plot(samples[:,0], np.linspace(DETECTOR_OPENING_ANGLE, DETECTOR_OPENING_ANGLE, len(samples[:,0])), 'k')
+    if horizontal_line != 0:
+        plt.hlines(10**3*horizontal_line**2,range[0][0],range[0][1],ls = '--', color = 'white')
+        plt.text(200,10**3*horizontal_line**2, r'$\mathrm{BEBC} \, \theta_\mathrm{max}^2 $', ha = 'right',
+                 va = 'bottom', color = 'white')
     dirname = os.path.dirname(os.path.abspath(__file__))
     plt.savefig(os.path.join(dirname, f"../recent_graphs/{filename}.png"), dpi=250)
 
