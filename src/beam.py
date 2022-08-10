@@ -25,6 +25,8 @@ class BeamExperiment:
         self.detector_distance = get_experimental_constants(experiment)[2]
         self.POT = get_experimental_constants(experiment)[9]
         self.bMesonFraction = get_experimental_constants(experiment)[10]
+        self.muon_e_min = get_experimental_constants(experiment)[11]
+        self.mT_max = get_experimental_constants(experiment)[12]
         self.linear_regime = True
         self.mixing_squared = 1
         self.mixing_type = mixing_type

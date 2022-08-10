@@ -37,22 +37,29 @@ def main():
     lower_bounds = np.array(lower_bounds)
     upper_bounds = np.array(upper_bounds)
     bounds = np.append(upper_bounds, lower_bounds, axis=0)
+    
+    x, y = get_cols(charm)
+    x0, y0 = x.mean(), y.mean()
+    angle = np.arctan2(y - y0, x - x0)
+    
+    idx = angle.argsort()
+    x, y = x[idx], y[idx]
+
 
     # # ------------------------ Plotting --------------------------------
     dpi = 250
     fig = plt.figure(figsize=(7, 7), dpi=dpi)
-    plt.xlabel(r'$M\, [ \mathrm{GeV}]$')
-    plt.ylabel(r'$|U_{e}|^2$')
-    plt.plot(*get_cols(bebc), label="Old BEBC")
-    # plt.plot(*get_cols(charm), label="CHARM")
-    plt.plot(*get_cols(belle), label="Belle")
+    plt.xlabel(r'$M_N\, [ \mathrm{GeV}]$')
+    plt.ylabel(r'$|U_{eN}|^2$')
+    plt.plot(*get_cols(bounds), 'k', label="BEBC (reanalysis)")
+    plt.plot(x,y, label="CHARM (recast)")
     plt.plot(*get_cols(t2k), label="T2K")
+    plt.plot(*get_cols(belle), label="Belle (recast)")
     plt.plot(*get_cols(delphi), label="DELPHI")
-    plt.plot(*get_cols(na62), '--', dashes=(5,2), label="NA62")
-    plt.plot(*get_cols(dune), '--', dashes=(5,2), label="DUNE")
-    plt.plot(*get_cols(mathusla), '--', dashes=(5,2), label="MATHUSLA")
-    plt.plot(*get_cols(ship), '--', dashes=(5,2), label="SHiP")
-    plt.plot(*get_cols(bounds), 'k', label="Our results")
+    # plt.plot(*get_cols(na62), '--', dashes=(5,2), label="NA62")
+    # plt.plot(*get_cols(dune), '--', dashes=(5,2), label="DUNE")
+    # plt.plot(*get_cols(mathusla), '--', dashes=(5,2), label="MATHUSLA")
+    # plt.plot(*get_cols(ship), '--', dashes=(5,2), label="SHiP")
     plt.legend(fontsize="small")
     plt.yscale('log')
     plt.xlim([0.1,3])
@@ -61,9 +68,8 @@ def main():
     plt.fill_between(*get_cols(belle), 1, color="#ddd")
     plt.fill_between(*get_cols(t2k), 1, color="#ddd")
     dirname = os.path.dirname(os.path.abspath(__file__))
-    plt.savefig(os.path.join(dirname, f"../recent_graphs/mass_bound_plot[{mixing_type}]1.png"), dpi=dpi)
+    plt.savefig(os.path.join(dirname, f"../recent_graphs/mass_bound_plot[{mixing_type}].png"), dpi=dpi)
     plt.show()
-
 def get_cols(array: np.ndarray):
     return (array[:,0], array[:,1])
 

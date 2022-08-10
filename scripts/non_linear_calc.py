@@ -14,9 +14,10 @@ from src.beam import BeamExperiment
 from src.mixing_type import MixingType
 from src.signal_processor import SignalProcessor
 from src.logger import Logger
+from src.experiment import Experiment
 
-def total_decays_less_than_observed(hnl_mass, mixing_squared, num_samples, mixing_type):
-    beam = BeamExperiment(mixing_type=mixing_type, num_samples=num_samples).with_mixing(mixing_squared)
+def total_decays_less_than_observed(hnl_mass, mixing_squared, experiment, num_samples, mixing_type):
+    beam = BeamExperiment(mixing_type=mixing_type,experiment=experiment, num_samples=num_samples).with_mixing(mixing_squared)
 
     beam.start_dump(hnl_mass)
     total_decays_less_than_observed = SignalProcessor(beam).total_decays_less_than_observed()
@@ -24,7 +25,7 @@ def total_decays_less_than_observed(hnl_mass, mixing_squared, num_samples, mixin
     return total_decays_less_than_observed
 
 def main():
-    hnl_masses, mass_range, num_samples, debug, mixing_type, plot, save, bound= parse_arguments()
+    hnl_masses, mass_range, num_samples, debug, mixing_type, plot, save, bound, experiment = parse_arguments()
     file = open(f"./{bound}_bound_data/{bound}_bounds_{mixing_type}_non_linear.csv", "a")
     logger = Logger(debug=debug)
     lower_bounds = []
@@ -43,7 +44,7 @@ def main():
         closest_bound = 0
         while abs((prev_mixing - mixing)/mixing) > 0.0005 and it < 25: 
             logger.log(f"Mixing: {mixing}")
-            less_decays_than_observed = total_decays_less_than_observed(hnl_mass, mixing, num_samples, mixing_type)
+            less_decays_than_observed = total_decays_less_than_observed(hnl_mass, mixing, experiment, num_samples, mixing_type)
 
             diff = abs(less_decays_than_observed)
             if diff < min_difference:
@@ -87,6 +88,7 @@ def parse_arguments():
     parser.add_argument('--debug', action='store_true', help="Print debug logs")
     parser.add_argument('--plot', action='store_true', help="Plot upper bounds")
     parser.add_argument('--save', action='store_true', help="Save data to file")
+    parser.add_argument('--exp', type=str, choices=['BEBC', 'NuTeV'], help="valid values: 'BEBC' or 'NuTeV'", default = 'BEBC')
     args = parser.parse_args()
 
     hnl_masses = args.m
@@ -97,7 +99,8 @@ def parse_arguments():
     plot = args.plot
     save = args.save
     mixing_type = MixingType[args.mixing]
-    return hnl_masses,mass_range,num_samples,debug,mixing_type,plot,save,bound
+    experiment = Experiment[args.exp]
+    return hnl_masses,mass_range,num_samples,debug,mixing_type,plot,save,bound,experiment
 
 if __name__ == "__main__":
     main()
