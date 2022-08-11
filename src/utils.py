@@ -64,7 +64,7 @@ def PLOT_ENERGY_ANGLE_JACOBIAN(momenta, range, filename, detector_cut=False, hor
     samples = np.array(samples)
     fig = plt.figure()
     plt.xlabel(xLabel + r'$ \, [ \mathrm{GeV}]$')
-    plt.ylabel(yLabel + r'$\, [\mathrm{rad}]$')
+    plt.ylabel(yLabel + r'$\, [\mathrm{rad}^2]$')
     plt.hist2d(samples[:,0], samples[:,1], bins=100, range=range)
     y_values = plt.gca().get_yticks()
     plt.gca().set_yticklabels(['${:.2f}$'.format(x) for x in y_values])

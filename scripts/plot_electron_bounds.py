@@ -31,6 +31,7 @@ def main():
     mathusla = np.array(read_csv_file("digitised_data/electron/MATHUSLA.csv"))
     na62 = np.array(read_csv_file("digitised_data/electron/NA62.csv"))
     ship = np.array(read_csv_file("digitised_data/electron/SHiP.csv"))
+    x,y = np.array(getCoords("digitised_data/electron/HNLeCHARM.dat"))
 
     lower_bounds.sort(key=lambda data: data[0], reverse=True)
     upper_bounds.sort(key=lambda data: data[0])
@@ -38,12 +39,11 @@ def main():
     upper_bounds = np.array(upper_bounds)
     bounds = np.append(upper_bounds, lower_bounds, axis=0)
     
-    x, y = get_cols(charm)
-    x0, y0 = x.mean(), y.mean()
-    angle = np.arctan2(y - y0, x - x0)
+    # x0, y0 = x.mean(), y.mean()
+    # angle = np.arctan2(y - y0, x - x0)
     
-    idx = angle.argsort()
-    x, y = x[idx], y[idx]
+    # idx = angle.argsort()
+    # x, y = x[idx], y[idx]
 
 
     # # ------------------------ Plotting --------------------------------
@@ -67,8 +67,9 @@ def main():
     plt.fill_between(*get_cols(delphi), 1, color="#ddd")
     plt.fill_between(*get_cols(belle), 1, color="#ddd")
     plt.fill_between(*get_cols(t2k), 1, color="#ddd")
+    plt.fill_between(x,y, 1, color="#ddd")
     dirname = os.path.dirname(os.path.abspath(__file__))
-    plt.savefig(os.path.join(dirname, f"../recent_graphs/mass_bound_plot[{mixing_type}].png"), dpi=dpi)
+    plt.savefig(os.path.join(dirname, f"../recent_graphs/mass_bound_plot{mixing_type}.png"), dpi=dpi)
     plt.show()
 def get_cols(array: np.ndarray):
     return (array[:,0], array[:,1])
@@ -88,6 +89,12 @@ def read_csv_file(filename):
     
     return data
 
+def getCoords(fileName, rescaleX= 1, rescaleY = 1):
+    # fullPath = os.path.join(dirname,fileName)
+    experimentArray = np.loadtxt(fileName)
+    experimentX = np.transpose(experimentArray)[0]*rescaleX
+    experimentY = np.transpose(experimentArray)[1]*rescaleY
+    return experimentX, experimentY
 
 if __name__ == "__main__":
     main()
