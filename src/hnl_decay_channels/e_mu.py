@@ -38,8 +38,8 @@ class ElectronMuon:
         total_signal_length = min(len(self.parent.momenta), len(lepton_energy_samples))
         # experimental cuts for electron pair
         elec_e_min = 0.8 #GeV
-        muon_e_min = 3. #GeV
-        mT_max = 1.85 #GeV
+        muon_e_min = self.beam.experiment.MUON_E_MIN
+        mT_max = self.beam.experiment.MT_MAX
         for i in range(total_signal_length):
             momenta = get_lepton_momenta_lab_frame(lepton_energy_samples[i], self.parent.momenta[i], self.parent, elec, muon)
             if momenta:

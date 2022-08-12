@@ -1,3 +1,4 @@
+from webbrowser import get
 import numpy as np
 from .experimental_constants import *
 from .momentum4 import Momentum4
@@ -13,30 +14,20 @@ from .experimental_constants import get_experimental_constants
 
 class BeamExperiment:
     def __init__(self, mixing_type, experiment, num_samples):
-        self.BEAM_ENERGY = get_experimental_constants(experiment)[7]
-        self.NUCLEON_MASS = get_experimental_constants(experiment)[8]
-        self.s = self.NUCLEON_MASS*(2*self.BEAM_ENERGY + self.NUCLEON_MASS)
-        self.beam_momentum = Momentum4.from_polar(self.BEAM_ENERGY + self.NUCLEON_MASS, 1, 0, np.sqrt(self.s))
-        self.beta_cm = self.BEAM_ENERGY/(self.BEAM_ENERGY + self.NUCLEON_MASS)
-        self.gamma_cm = (self.BEAM_ENERGY + self.NUCLEON_MASS)/np.sqrt(self.s)
+        self.experiment = get_experimental_constants(experiment)
+        self.s = self.experiment.NUCLEON_MASS*(2*self.experiment.BEAM_ENERGY + self.experiment.NUCLEON_MASS)
+        self.beam_momentum = Momentum4.from_polar(self.experiment.BEAM_ENERGY + self.experiment.NUCLEON_MASS, 1, 0, np.sqrt(self.s))
+        self.beta_cm = self.experiment.BEAM_ENERGY/(self.experiment.BEAM_ENERGY + self.experiment.NUCLEON_MASS)
+        self.gamma_cm = (self.experiment.BEAM_ENERGY + self.experiment.NUCLEON_MASS)/np.sqrt(self.s)
         self.children = []
-        self.max_opening_angle = get_experimental_constants(experiment)[0]
-        self.detector_length = get_experimental_constants(experiment)[1]
-        self.detector_distance = get_experimental_constants(experiment)[2]
-        self.POT = get_experimental_constants(experiment)[9]
-        self.bMesonFraction = get_experimental_constants(experiment)[10]
-        self.muon_e_min = get_experimental_constants(experiment)[11]
-        self.mT_max = get_experimental_constants(experiment)[12]
         self.linear_regime = True
         self.mixing_squared = 1
         self.mixing_type = mixing_type
         self.num_samples = num_samples
-        self.OBSERVED_EVENTS = get_experimental_constants(experiment)[6]
-        self.ELECTRON_NU_MASSLESS_FLUX = get_experimental_constants(experiment)[5]
         if mixing_type == MixingType.electron:
-            self.channels = get_experimental_constants(experiment)[3]
+            self.channels = self.experiment.ELECTRON_HNL_CHANNELS
         elif mixing_type == MixingType.tau:
-            self.channels = get_experimental_constants(experiment)[4]
+            self.channels = self.experiment.TAU_HNL_CHANNELS
     
     def with_mixing(self, mixing_squared):
         self.linear_regime = False
@@ -89,13 +80,9 @@ class BeamExperiment:
         Ds_meson.decay(hnl_mass)  
 
     def __B_meson_channel(self, hnl_mass):
-        four_momenta_b0 = self.__parse_hepmc_four_momenta('src/hepmc_input/bMesons.hepmc', pid='511')
         four_momenta_b_plus = self.__parse_hepmc_four_momenta('src/hepmc_input/bMesons.hepmc', pid='521')
-#        B0_meson = B0Meson(beam=self, momenta=four_momenta_b0)
         B_plus_meson = BMeson(beam=self, momenta=four_momenta_b_plus)
-#        self.children.append(B0_meson)
         self.children.append(B_plus_meson)
-#        B0_meson.decay(hnl_mass)
         B_plus_meson.decay(hnl_mass)
 
     def __parse_hepmc_four_momenta(self, filename, pid):

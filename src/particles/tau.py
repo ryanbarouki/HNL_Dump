@@ -9,7 +9,6 @@ from .tau_decay_modes import TauDecayModes
 class Tau(Particle):
     def __init__(self, beam=None, parent=None, momenta=[]):
         super().__init__(TAU_MASS, beam, parent, momenta)
-        self.beam = beam
     def decay(self, hnl_mass):
         if hnl_mass > TAU_MASS:
             return self
@@ -25,7 +24,7 @@ class Tau(Particle):
         hnl_rest_momenta  = e_cos_theta_to_momentum4(hnl_rest_samples, hnl_mass)
         hnl.set_momenta(hnl_rest_momenta).boost(self.momenta)
         PLOT_ENERGY_ANGLE_JACOBIAN(hnl.momenta, ((0, 200), (0, 0.5)), filename=f"hnls_from_TAU_[{self.beam.mixing_type}]", detector_cut=False,
-                          horizontal_line=self.beam.max_opening_angle, xLabel = r'$E_N$', yLabel = r'$\theta_N^2 \, \times \, 10^{-3}$')
+                          horizontal_line=self.beam.experiment.DETECTOR_OPENING_ANGLE, xLabel = r'$E_N$', yLabel = r'$\theta_N^2 \, \times \, 10^{-3}$')
 
         hnl.decay()
         

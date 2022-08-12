@@ -32,7 +32,7 @@ class ElectronPion:
 
         # Apply cuts
         cut_signal = []
-        mT_max = 1.85 #GeV
+        mT_max = self.beam.experiment.MT_MAX
         elec_e_min = 0.8 #GeV
         for elec_p, pion_p in signal:
             p_tot = elec_p + pion_p

@@ -108,13 +108,13 @@ class HNL(Particle):
 
     def __get_prop_factor_for_regime(self, partial_decay):
         if self.beam.linear_regime:
-            return self.__average_propagation_factor(self.beam.detector_length, partial_decay)
+            return self.__average_propagation_factor(self.beam.experiment.DETECTOR_LENGTH, partial_decay)
         else:
             total_decay = self.__total_decay_rate()
-            return self.__avg_non_linear_propagation_factor(self.beam.detector_length, self.beam.detector_distance, partial_decay, total_decay)
+            return self.__avg_non_linear_propagation_factor(self.beam.experiment.DETECTOR_LENGTH, self.beam.experiment.DETECTOR_DISRANCE, partial_decay, total_decay)
 
     def decay(self):
-        self.acceptance = self.geometric_cut(0, self.beam.max_opening_angle)
+        self.acceptance = self.geometric_cut(0, self.beam.experiment.DETECTOR_OPENING_ANGLE)
         DEBUG_AVERAGE_MOMENTUM(self, "Average HNL momentum after angle cut")
         for channel_code in self.beam.channels:
             if channel_code in self.decay_channels:
