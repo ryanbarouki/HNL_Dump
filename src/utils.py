@@ -51,7 +51,7 @@ def PLOT_ENERGY_ANGLE(momenta, range, filename, detector_cut=False, horizontal_l
         plt.text(200,horizontal_line, r'$\mathrm{BEBC} \, \theta_\mathrm{max} $', ha = 'right',
                  va = 'bottom', color = 'white')
     dirname = os.path.dirname(os.path.abspath(__file__))
-    plt.savefig(os.path.join(dirname, f"../recent_graphs/{filename}.png"), dpi=250)
+    plt.savefig(os.path.join(dirname, f"../temp_graphs/{filename}.png"), dpi=250)
     
 def PLOT_ENERGY_ANGLE_JACOBIAN(momenta, range, filename, detector_cut=False, horizontal_line=0, xLabel = r'$E$', yLabel = r'$\theta$'):
     if not Logger().DEBUG:
@@ -75,7 +75,7 @@ def PLOT_ENERGY_ANGLE_JACOBIAN(momenta, range, filename, detector_cut=False, hor
         plt.text(200,10**3*horizontal_line**2, r'$\mathrm{BEBC} \, \theta_\mathrm{max}^2 $', ha = 'right',
                  va = 'bottom', color = 'white')
     dirname = os.path.dirname(os.path.abspath(__file__))
-    plt.savefig(os.path.join(dirname, f"../recent_graphs/{filename}.png"), dpi=250)
+    plt.savefig(os.path.join(dirname, f"../temp_graphs/{filename}.png"), dpi=250)
 
 def allowed_e1_e2_three_body_decays(e1, e2, e_parent, m1, m2, m3):
     x = e_parent**2 + m1**2 + m2**2 - m3**2
