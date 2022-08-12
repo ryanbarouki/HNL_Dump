@@ -17,4 +17,4 @@ The `non_linear_calc.py` script can be used for both the upper and lower bound a
 ## Repurposing the code
 Majorana/Dirac HNL: The attribute `HNL.majorana` in `src/particles/hnl.py` may be set to True/False, changing the decay rates as appropriate.
 
-Experimental parameters: To find the sensitivity to HNLs of a different experiment, the relevant parameters should be placed in `src/experimental_constants.py`, as well as adding the name of the experiment to `src/experiments.py`.
+Experimental parameters: To find the sensitivity to HNLs of a different experiment, the relevant parameters should be placed in `src/experimental_constants.py`, as well as adding the name of the experiment to `src/experiments.py`. Be aware that currently the MC assumes an on-axis detector.
